@@ -55,7 +55,7 @@ def plotDots(dots, dots_bound=None, show=True, color='black', size=15, width=185
     else:
         pl.plot_3D_dots_go(dots, fig=fig, marker={'size': size, 'color': color,
                                                   'line': dict(width=width, color='white')})
-    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.05)
+    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01)
     if save is not None:
         fig.write_html(save)
     if show:
