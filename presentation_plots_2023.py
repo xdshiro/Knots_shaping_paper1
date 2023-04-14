@@ -2,8 +2,8 @@ from functions_based import *
 import my_functions.beams_and_pulses as bp
 import my_functions.plotings as pl
 
-x_lim_3D, y_lim_3D, z_lim_3D = (-3, 3), (-3, 3), (-1.0, 1.0)
-res_x_3D, res_y_3D, res_z_3D = 270, 270, 41
+x_lim_3D, y_lim_3D, z_lim_3D = (-4, 4), (-4, 4), (-1.0, 1.0)
+res_x_3D, res_y_3D, res_z_3D = 270, 270, 3
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -106,7 +106,7 @@ if 0:
     plt.show()
 
 # trefoil polynomials
-if 1:
+if 0:
     C00 = 1.71
     C01 = -5.66
     C02 = 6.38
@@ -119,6 +119,32 @@ if 1:
             C03 * bp.LG_simple(*mesh_3D, l=0, p=3) +
             C30 * bp.LG_simple(*mesh_3D, l=3, p=0)
     ) / bp.LG_simple(*mesh_3D, l=0, p=0) / ((1 + mesh_3D[0] ** 2 + mesh_3D[1] ** 2) ** 3)
+    field = field / field.max()
+    # field = (mesh_3D[0] ** 2 + mesh_3D[1] ** 2) ** 1.5
+    plot_field(field, axes=False)
+    plt.show()
+    exit()
+    Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
+                             opacityscale='max', colorscale='Jet')
+    _, dots_init = sing.get_singularities(np.angle(field), axesAll=True, returnDict=True)
+    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=10, fig=Fig)
+    plt.show()
+    
+# trefoil polynomials modifications
+if 1:
+    C00 = 1.71
+    C01 = -5.66
+    C02 = 6.38
+    C03 = -2.3
+    C30 = -4.36
+    field = (
+            C00 * bp.LG_simple(*mesh_3D, l=0, p=0) +
+            C01 * bp.LG_simple(*mesh_3D, l=0, p=1) +
+            C02 * bp.LG_simple(*mesh_3D, l=0, p=2) +
+            C03 * bp.LG_simple(*mesh_3D, l=0, p=3) +
+            C30 * bp.LG_simple(*mesh_3D, l=3, p=0)
+    ) / ((1 + mesh_3D[0] ** 2 + mesh_3D[1] ** 2) ** 3)
+    
     field = field / field.max()
     # field = (mesh_3D[0] ** 2 + mesh_3D[1] ** 2) ** 1.5
     plot_field(field, axes=False)
