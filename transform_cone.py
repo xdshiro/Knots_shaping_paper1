@@ -2,20 +2,23 @@ from functions_based import *
 import my_functions.plotings as pl
 import knots_ML.data_generation as dg
 """used modules"""
-plot_milnor_field = False
-plot_milnor_lines = True
+plot_milnor_field = 1
+plot_milnor_lines = 1
 plot_braids = False
+plot_real_field = True
+plot_real_lines = 1
 """beam parameters"""
 w = 2.5
 # LG spectrum
-moments = {'p': (0, 10), 'l': (-3, 3)}
+moments = {'p': (0, 20), 'l': (-3, 3)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-4, 4), (-4, 4), (-1.2, 1.2)
-res_x_3D, res_y_3D, res_z_3D = 71, 71, 71
+x_lim_3D, y_lim_3D, z_lim_3D = (-10, 10), (-10, 10), (-1.2, 1.2)
+res_x_3D, res_y_3D, res_z_3D = 121, 121, 71
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
 mesh_3D = np.meshgrid(x_3D, y_3D, z_3D, indexing='ij')  #
+mesh_2D = np.meshgrid(x_3D, y_3D, indexing='ij')  #
 R = np.sqrt(mesh_3D[0] ** 2 + mesh_3D[1] ** 2)
 boundary_3D = [[0, 0, 0], [res_x_3D, res_y_3D, res_z_3D]]
 """creating the field"""
@@ -42,7 +45,8 @@ field = field_of_braids(
 )
 """field transformations"""
 # cone transformation
-field_milnor = field * (1 + R ** 2) ** 2 * (1 + R ** 2) ** 2j
+Ry = np.sqrt(mesh_3D[1] ** 2 + mesh_3D[2] ** 2)
+field_milnor = field * (1 + R ** 2) ** 2 * (1 + Ry ** 2) ** 2j
 field_gauss = field_milnor * bp.LG_simple(*mesh_3D[:2], 0, l=0, p=0, width=w, k0=1, x0=0, y0=0, z0=0)
 field_norm = dg.normalization_field(field_gauss)
 # pl.plot_3D_density(np.abs(field_norm))
@@ -52,7 +56,7 @@ if plot_milnor_field:
     plt.show()
 if plot_milnor_lines:
     _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
+    dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
     plt.show()
 if plot_braids:
     braid = field_of_braids(
@@ -63,29 +67,43 @@ if plot_braids:
     plot_field(braid)
     plt.show()
     _, dots_init = sing.get_singularities(np.angle(braid), axesAll=False, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
+    dp.plotDots(dots_init, boundary_3D, color='red', show=True, size=7)
     plt.show()
 
 # building 'LG' field
-##################################################################################
-# moment0 = moments['l'][0]
-# z_value_array = [0]
-# values_total = 0
-# for z_value in z_value_array:
-#     new_function = functools.partial(bp.LG_simple, z=z_value)
-#     values = cbs.LG_spectrum(
-#         field_norm[:, :, z_ind], **moments, mesh=mesh2D_ind, plot=True, width=w * w_spec, k0=1,
-#         functions=new_function
-#     )
-#     values_total += values
-# l1, l2, p1, p2 = moments['l'][0], moments['l'][1], moments['p'][0], moments['p'][1]
-#
-# pl.plot_2D(np.abs(values_total), x=np.arange(l1 - 0.5, l2 + 1 + 0.5), y=np.arange(p1 - 0.5, p2 + 1 + 0.5),
-#            interpolation='none', grid=True, xname='l', yname='p', show=False)
-# plt.yticks(np.arange(p1, p2 + 1))
-# plt.xticks(np.arange(l1, l2 + 1))
-# plt.show()
-####################################################################
+#################################################################################
+moment0 = moments['l'][0]
+values_total = 0
+z_value = 0
+z_ind = res_z_3D // 2
+w_spec = 1
+new_function = functools.partial(bp.LG_simple, z=z_value)
+values = cbs.LG_spectrum(
+    field_norm[:, :, z_ind], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
+    functions=new_function
+)
+field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
+for l, p_array in enumerate(values):
+    for p, value in enumerate(p_array):
+        field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+                                             width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+if plot_real_field:
+    plot_field(field_gauss)
+    plt.show()
+
+if plot_real_lines:
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
+    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
+    plt.show()
+###################################################################
+
+
+
+
+
+
+
+
 exit()
 w = 2.5
 w_spec = 1

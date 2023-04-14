@@ -163,7 +163,7 @@ def rotate_3d_field_90(field, axis):
 
 
 # %%
-def plot_field(field, axes=True, titles=('Absolute value', 'Phase')):
+def plot_field(field, axes=True, titles=('Absolute value', 'Phase'), cmap='afmhot'):
     if len(np.shape(field)) == 3:
         field2D = field[:, :, np.shape(field)[2] // 2]
     else:
@@ -178,7 +178,7 @@ def plot_field(field, axes=True, titles=('Absolute value', 'Phase')):
     plt.rc('figure', titlesize=122)  # fontsize of the figure title
     plt.subplots(1, 2, figsize=(11, 5))
     plt.subplot(1, 2, 1)
-    plt.imshow(np.abs(field2D), cmap='afmhot', interpolation='nearest')
+    plt.imshow(np.abs(field2D), cmap=cmap, interpolation='nearest')
     plt.colorbar(fraction=0.04, pad=0.02)
     plt.title(titles[0])
     if not axes:

@@ -36,10 +36,11 @@ if False:
     plot_field(field_edge, axes=False)
     plt.show()
 # LG
-if 0:
-    field = bp.LG_simple(*mesh_2D, l=0, p=0)
-    plot_field(field, axes=False)
+if 1:
+    field = bp.LG_simple(*mesh_2D, l=3, p=0)
+    plot_field(field/field.max(), axes=False, cmap='viridis')
     plt.show()
+    exit()
     field = bp.LG_simple(*mesh_2D, l=1, p=0)
     plot_field(field, axes=False)
     plt.show()
