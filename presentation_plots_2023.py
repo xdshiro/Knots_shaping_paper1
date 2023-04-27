@@ -2,8 +2,8 @@ from functions_based import *
 import my_functions.beams_and_pulses as bp
 import my_functions.plotings as pl
 
-x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-0.7, 0.7)
-res_x_3D, res_y_3D, res_z_3D = 71, 71, 71
+x_lim_3D, y_lim_3D, z_lim_3D = (-2.0, 2.0), (-2.0, 2.0), (-1.5, 1.5)
+res_x_3D, res_y_3D, res_z_3D = 70, 70, 70
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -37,22 +37,24 @@ if False:
     plt.show()
 # LG
 if 0:
-    field = bp.LG_simple(*mesh_2D, l=3, p=0)
-    plot_field(field/field.max(), axes=False, cmap='viridis')
+    field = bp.LG_simple(*mesh_2D, l=0, p=1)
+    plot_field(field/field.max(), axes=False)
+    # plot_field(field/field.max(), axes=False, cmap='viridis')
     plt.show()
     exit()
-    field = bp.LG_simple(*mesh_2D, l=1, p=0)
+    field = bp.LG_simple(*mesh_2D, l=1, p=1)
     plot_field(field, axes=False)
     plt.show()
-    field = bp.LG_simple(*mesh_2D, l=2, p=0)
+    field = bp.LG_simple(*mesh_2D, l=2, p=1)
     plot_field(field, axes=False)
     plt.show()
-    field = bp.LG_simple(*mesh_2D, l=-1, p=0)
+    field = bp.LG_simple(*mesh_2D, l=-1, p=1)
     plot_field(field, axes=False)
     plt.show()
-    field = bp.LG_simple(*mesh_2D, l=-2, p=0)
+    field = bp.LG_simple(*mesh_2D, l=-2, p=1)
     plot_field(field, axes=False)
     plt.show()
+    exit()
 
 # LG 3D
 if 0:
@@ -64,6 +66,32 @@ if 0:
     _, dots_init = sing.get_singularities(np.angle(field), axesAll=False, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=10, fig=Fig)
     plt.show()
+    exit()
+    
+# LG 3D turb
+if 1:
+    import scipy.fft as fft
+    # field = bp.LG_simple(*mesh_3D, l=1, p=0) / bp.LG_simple(*mesh_3D, l=1, p=0).max()
+    field = (bp.LG_simple(*mesh_3D, l=1, p=0) +
+             bp.LG_simple(*mesh_3D, l=2, p=0) / 20 +
+             bp.LG_simple(*mesh_3D, l=0, p=4) / 20 -
+             bp.LG_simple(*mesh_3D, l=0, p=3) / 20 -
+             bp.LG_simple(*mesh_3D, l=0, p=1) / 20
+    )
+    # plot_field(field, axes=False)
+    # plt.show()
+    # exit()
+    # field = fft.fft(field) * np.exp(1j * (np.random.rand(*np.shape(field)) - 0.5) / 5)
+    # field = fft.fft(field) * np.exp(1j * (mesh_3D) / 5)
+    #
+    # field = fft.ifft(field)
+
+    Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
+                             opacityscale='max', colorscale='Jet')
+    _, dots_init = sing.get_singularities(np.angle(field), axesAll=False, returnDict=True)
+    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=10, fig=Fig)
+    plt.show()
+    exit()
 
 # LGs 3D
 if 0:

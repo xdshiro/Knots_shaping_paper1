@@ -163,7 +163,7 @@ def rotate_3d_field_90(field, axis):
 
 
 # %%
-def plot_field(field, axes=True, titles=('Absolute value', 'Phase'), cmap='afmhot'):
+def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmap='afmhot'):
     if len(np.shape(field)) == 3:
         field2D = field[:, :, np.shape(field)[2] // 2]
     else:
