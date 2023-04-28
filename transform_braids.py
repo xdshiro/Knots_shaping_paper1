@@ -4,17 +4,17 @@ import knots_ML.data_generation as dg
 """used modules"""
 plot_milnor_field = 1
 plot_milnor_lines = False
-plot_braids = False
-plot_real_field = False
-plot_real_lines = False
+plot_braids = 0
+plot_real_field = 1
+plot_real_lines = 1
 """beam parameters"""
-w = 1.6
+w = 1.2
 
 # LG spectrum
-moments = {'p': (0, 9), 'l': (-4, 4)}
+moments = {'p': (0, 9), 'l': (-5, 5)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1.2, 1.2)
-res_x_3D, res_y_3D, res_z_3D = 71, 71, 71
+x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1.0, 1.0)
+res_x_3D, res_y_3D, res_z_3D = 91, 91, 71
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -28,9 +28,9 @@ xyz_array = [
     (mesh_3D[0], mesh_3D[1], mesh_3D[2]),
     (mesh_3D[0], mesh_3D[1], mesh_3D[2])
 ]
-z_ind = res_z_3D // 2 - 20
+z_ind = res_z_3D // 2
 # starting angle for each braid
-angle_array = [0, 1.25 * np.pi]
+angle_array = [0, 1 * np.pi]
 # powers in cos in sin
 pow_cos_array = [1.5, 1.5]
 pow_sin_array = [1.5, 1.5]
@@ -63,10 +63,10 @@ if plot_braids:
     braid = field_of_braids(
         xyz_array, angle_array, pow_cos_array, pow_sin_array, conj_array,
         theta_array=theta_array, a_cos_array=a_cos_array, a_sin_array=a_sin_array,
-        braid_func=braid_before_trans, scale=[0.1, 0.1, np.pi]
+        braid_func=braid_before_trans, scale=[0.3, 0.3, np.pi]
     )
-    plot_field(braid)
-    plt.show()
+    # plot_field(braid)
+    # plt.show()
     _, dots_init = sing.get_singularities(np.angle(braid), axesAll=False, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='red', show=True, size=7)
     plt.show()
@@ -93,7 +93,7 @@ if plot_real_field:
     plt.show()
 
 if plot_real_lines:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
     plt.show()
 ###################################################################
