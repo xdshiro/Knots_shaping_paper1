@@ -6,7 +6,10 @@ import numpy as np
 from scipy.special import assoc_laguerre
 import my_functions.functions_general as fg
 import math
-def LG_simple_xz(x, z, y=0, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0):
+def gauss_z(x, y, z, width):
+    return np.exp(-z ** 2 / width ** 2)
+
+def LG_simple_xz(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0, width_gauss=None):
     """
     Classic LG beam
     :param l: azimuthal index
@@ -17,15 +20,15 @@ def LG_simple_xz(x, z, y=0, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0):
     :param y0: center of the beam in y
     :return: complex field
     """
-
+    
     def laguerre_polynomial(x, l, p):
         return assoc_laguerre(x, p, l)
-
+    
     x = x - x0
     y = y - y0
     z = z - z0
     zR = k0 * width ** 2
-
+    
     E = (np.sqrt(math.factorial(p) / (np.pi * math.factorial(np.abs(l) + p)))
          * fg.rho(x, y) ** np.abs(l) * np.exp(1j * l * fg.phi(x, y))
          / (width ** (np.abs(l) + 1) * (1 + 1j * z / zR) ** (np.abs(l) + 1))
@@ -33,7 +36,10 @@ def LG_simple_xz(x, z, y=0, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0):
          * np.exp(-fg.rho(x, y) ** 2 / (2 * width ** 2 * (1 + 1j * z / zR)))
          * laguerre_polynomial(fg.rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)), np.abs(l), p)
          )
-    return E
+    if width_gauss is not None:
+        return E * gauss_z(x=x, y=y, z=z, width=width_gauss)
+    else:
+        return E
 
 def LG_spectre_coeff(field, l, p, xM=(-1, 1), yM=(-1, 1), width=1., k0=1., mesh=None, functions=bp.LG_simple):
     """
@@ -58,7 +64,7 @@ def LG_spectre_coeff(field, l, p, xM=(-1, 1), yM=(-1, 1), width=1., k0=1., mesh=
         # print(123, xArray)
     # shape = np.shape(field)
     # xyMesh = fg.create_mesh_XY_old(xMax=xM[1], yMax=yM[1], xRes=shape[0], yRes=shape[1], xMin=xM[0], yMin=yM[0])
-    LGlp = functions(*mesh, l=l, p=p, width=width, k0=k0)
+    LGlp = functions(x=mesh[0], y=0, z=mesh[1], l=l, p=p, width=width, k0=k0)
     # plt.imshow(LGlp)
     # plt.show()
     # print('hi')
@@ -114,7 +120,7 @@ plot_real_lines = False
 w = 1.2
 
 # LG spectrum
-moments = {'p': (0, 9), 'l': (-7, 4)}
+moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1.2, 1.2)
 res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
@@ -183,9 +189,17 @@ moment0 = moments['l'][0]
 values_total = 0
 y_value = 0
 w_spec = 1
-new_function = functools.partial(LG_simple_xz, y=y_value)#, width=w * w_spec)
-field_norm = np.load('trefoil3d.npy')
-# plot_field(new_function(*mesh_2D_xz, l=3))
+width_gauss = 0.75
+
+new_function = functools.partial(LG_simple_xz, y=y_value, width_gauss=width_gauss)#, width=w * w_spec)
+
+field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_xz[1], width=width_gauss)
+# plot_field(new_function(*mesh_2D_xz, l=1, p=1))
+# plot_field(np.load('trefoil3d.npy'))
+# plt.show()
+# exit()
+# plot_field(field_norm[:, y_ind, :])
+# plot_field(field_norm)
 # plt.show()
 # exit()
 values = LG_spectrum(
