@@ -10,7 +10,7 @@ def gauss_z(x, y, z, width):
     if width is None:
         return 1
     else:
-        return np.exp(-z ** 2 / width ** 2)
+        return np.exp(-(z - 0.5) ** 2 / width ** 2) + np.exp(-(z + 0.5) ** 2 / width ** 2)
 
 def LG_simple_xyz(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0, width_gauss=None):
     """
@@ -113,19 +113,19 @@ def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=
     return spectrum
 
 """used modules"""
-plot_milnor_field = 0
-plot_milnor_lines = False
+plot_milnor_field = 1
+plot_milnor_lines = 1
 plot_braids = False
-plot_real_field = True
-plot_real_lines = True
+plot_real_field = 1
+plot_real_lines = 1
 """beam parameters"""
 w = 1.2
 
 # LG spectrum
-moments = {'p': (0, 9), 'l': (-7, 7)}
+moments = {'p': (0, 8), 'l': (-4, 4)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1.2, 1.2)
-res_x_3D, res_y_3D, res_z_3D = 71, 71, 71
+x_lim_3D, y_lim_3D, z_lim_3D = (-5, 5), (-5, 5), (-1.5, 1.5)
+res_x_3D, res_y_3D, res_z_3D = 81, 81, 81
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -164,10 +164,22 @@ field_gauss = field_milnor * bp.LG_simple(*mesh_3D[:2], 0, l=0, p=0, width=w, k0
 field_norm = dg.normalization_field(field_gauss)
 # pl.plot_3D_density(np.abs(field_norm))
 # plt.show()
+moment0 = moments['l'][0]
+values_total = 0
+y_value = 0
+w_spec = 1
+
+k_0_spec = 1.7
+# width_gauss = 0.7
+width_gauss = 0.3
+
+new_function = functools.partial(LG_simple_xyz, width_gauss=width_gauss) #, width=w * w_spec)
+field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
+
 if plot_milnor_field:
-    plot_field(field_gauss)
+    plot_field(field_norm)
     plt.show()
-    plot_field(field_gauss[:, y_ind, :])
+    plot_field(field_norm[:, y_ind, :])
     plt.show()
 if plot_milnor_lines:
     _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
@@ -187,16 +199,9 @@ if plot_braids:
 
 # building 'LG' field
 #################################################################################
-moment0 = moments['l'][0]
-values_total = 0
-y_value = 0
-w_spec = 1
 
-width_gauss = 1
-new_function = functools.partial(LG_simple_xyz, width_gauss=width_gauss)#, width=w * w_spec)
-field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # field_norm = np.load('trefoil3d.npy') * gauss_z(*mesh_3D, width=width_gauss)
-# plot_field(new_function(*mesh_2D_xz, l=1, p=1))
+# plot_field(new_function(*mesh_3D, l=1, p=1, k0=2)[:, y_ind, :])
 # plot_field(np.load('trefoil3d.npy'))
 # plt.show()
 # exit()
@@ -206,7 +211,7 @@ field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # exit()
 
 values = LG_spectrum(
-    field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=1,
+    field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
     functions=new_function
 )
 
@@ -219,7 +224,7 @@ field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
 for l, p_array in enumerate(values):
     for p, value in enumerate(p_array):
         field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                             width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+                                             width=w * w_spec, k0=k_0_spec, x0=0, y0=0, z0=0)
       
       
 

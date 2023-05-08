@@ -3,7 +3,7 @@ import my_functions.plotings as pl
 import knots_ML.data_generation as dg
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = False
+plot_milnor_lines = 1
 plot_braids = 0
 plot_real_field = 1
 plot_real_lines = 1
@@ -13,8 +13,8 @@ w = 1.2
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-5, 5)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1.0, 1.0)
-res_x_3D, res_y_3D, res_z_3D = 91, 91, 71
+x_lim_3D, y_lim_3D, z_lim_3D = (-5, 5), (-5, 5), (-1.5, 1.5)
+res_x_3D, res_y_3D, res_z_3D = 81, 81, 81
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -55,6 +55,8 @@ field_norm = dg.normalization_field(field_gauss)
 if plot_milnor_field:
     plot_field(field_gauss[:, :, z_ind])
     plt.show()
+    plot_field(field_norm[:, res_y_3D // 2, :])
+    plt.show()
 if plot_milnor_lines:
     _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
@@ -87,11 +89,12 @@ field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
 for l, p_array in enumerate(values):
     for p, value in enumerate(p_array):
         field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                             width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+                                             width=w * w_spec, k0=1.5, x0=0, y0=0, z0=0)
 if plot_real_field:
     plot_field(field_new_3D)
     plt.show()
-
+    plot_field(field_new_3D[:, res_y_3D // 2, :])
+    plt.show()
 if plot_real_lines:
     _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
