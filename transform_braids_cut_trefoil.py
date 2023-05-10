@@ -117,8 +117,12 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1):
     def sin_v(x, y, z, power=1):
         return (v(x, y, z) ** power - np.conj(v(x, y, z)) ** power) / 2j
 
+    angle_3D = np.ones(np.shape(z)) * angle
+    shape = np.shape(angle_3D)
+    angle_3D[:, :, shape[2] // 2:] *= 1.3
+
     return u(x, y, z) * np.exp(1j * theta) - (
-            cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle)
+            cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
 
 
 def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1):
@@ -127,9 +131,20 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 
     def sin_v(x, y, z, power=1):
         return (np.exp(1j * z) ** power - np.conj(np.exp(1j * z)) ** power) / 2j
-
+    # if z>0:
+    #     angle +=np.py//4
+    angle_3D = np.ones(np.shape(z)) * angle
+    shape = np.shape(angle_3D)
+    angle_3D[:, :, shape[2] // 2 :] *= 1.3
+    # angle_3D_new = np.array(angle_3D).reshape((3, -1)).T
+    # angle_3D_new[:, 2][len(angle_3D_new[:, 2])//3:] *= 1.3
+    # angle_3D_new[:, 1][len(angle_3D_new[:, 2])//3:] *= 1.3
+    # angle_3D_new[:, 0][len(angle_3D_new[:, 2])//3:] *= 1.3
+    # angle_3D = angle_3D_new.T.reshape(shape)
     return (x + 1j * y) * np.exp(1j * theta) - (
-            cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle)
+        cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
+    # return (x + 1j * y) * np.exp(1j * theta) - (
+    #     cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle)
 
 
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
@@ -149,7 +164,17 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
     # braid scaling
     a_cos_array = [1, 1]
     a_sin_array = [1, 1]
-
+    scale = [0.4, 0.4, np.pi]
+    if scale is not None:
+        for i, xyz in enumerate(xyz_array):
+            shape = np.shape(xyz)
+            # print(np.array(xyz).reshape((3, -1)))
+            xyz_new = np.array(xyz).reshape((3, -1)).T * scale
+            xyz_array[i] = tuple(xyz_new.T.reshape(shape))
+    # shape = np.shape(xyz_array[1])
+    # xyz_new = np.array(xyz_array[1]).reshape((3, -1)).T
+    # xyz_new[:, 2][len(xyz_new[:, 2])//3:] += np.pi//4
+    # xyz_array[1] = tuple(xyz_new.T.reshape(shape))
     ans = 1
     if theta_array is None:
         theta_array = [0] * len(angle_array)
@@ -157,7 +182,6 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
         a_cos_array = [1] * len(angle_array)
     if a_sin_array is None:
         a_sin_array = [1] * len(angle_array)
-
 
     for i, xyz in enumerate(xyz_array):
         if conj_array[i]:
@@ -171,17 +195,17 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
 
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = 0
-plot_braids = False
-plot_real_field = True
-plot_real_lines = False
+plot_milnor_lines = 1
+plot_braids = 1
+plot_real_field = 1
+plot_real_lines = 1
 """beam parameters"""
 w = 1.2
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1.2, 1.2)
+x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1., 1.)
 res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
@@ -210,10 +234,7 @@ theta_array = [0.0 * np.pi, 0 * np.pi]
 # braid scaling
 a_cos_array = [1, 1]
 a_sin_array = [1, 1]
-field = field_of_braids(
-    xyz_array, angle_array, pow_cos_array, pow_sin_array, conj_array,
-    theta_array=theta_array, a_cos_array=a_cos_array, a_sin_array=a_sin_array
-)
+field = field_of_braids_separate_trefoil(mesh_3D, braid_func=braid)
 """field transformations"""
 # cone transformation
 field_milnor = field * (1 + R ** 2) ** 3
@@ -230,13 +251,9 @@ if plot_milnor_lines:
     _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
     plt.show()
-exit()
+
 if plot_braids:
-    braid = field_of_braids(
-        xyz_array, angle_array, pow_cos_array, pow_sin_array, conj_array,
-        theta_array=theta_array, a_cos_array=a_cos_array, a_sin_array=a_sin_array,
-        braid_func=braid_before_trans, scale=[0.1, 0.1, np.pi]
-    )
+    braid = field_of_braids_separate_trefoil(mesh_3D, braid_func=braid_before_trans)
     plot_field(braid)
     plt.show()
     _, dots_init = sing.get_singularities(np.angle(braid), axesAll=False, returnDict=True)
