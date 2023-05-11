@@ -110,22 +110,41 @@ def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=
         plt.show()
     return spectrum
 
-def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1):
+def u(x, y, z):
+    numerator = x ** 2 + y ** 2 + z ** 2 - 1 + 2j * z
+    denominator = x ** 2 + y ** 2 + z ** 2 + 1
+    return numerator / denominator
+
+
+def v(x, y, z):
+    numerator = 2 * (x + 1j * y)
+    denominator = x ** 2 + y ** 2 + z ** 2 + 1
+    return numerator / denominator
+
+A, B, C = 40, 50, 0.25 * np.pi
+braids_modification = [True, True]
+def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
+                                     braids_modification=None):
     def cos_v(x, y, z, power=1):
         return (v(x, y, z) ** power + np.conj(v(x, y, z)) ** power) / 2
-
+    
     def sin_v(x, y, z, power=1):
         return (v(x, y, z) ** power - np.conj(v(x, y, z)) ** power) / 2j
-
+    
     angle_3D = np.ones(np.shape(z)) * angle
     shape = np.shape(angle_3D)
-    angle_3D[:, :, shape[2] // 2:] *= 1.3
-
+    # shape[2] // 2:
+    # angle_3D[:, :, A:B] *= C
+    # if braids_modification:
+    #     angle_3D[:, :, A:B] += C
+    if braids_modification:
+        angle_3D[shape[0]//3 *2:, :, :] += C
     return u(x, y, z) * np.exp(1j * theta) - (
             cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
 
 
-def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1):
+def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
+                       braids_modification=None):
     def cos_v(x, y, z, power=1):
         return (np.exp(1j * z) ** power + np.conj(np.exp(1j * z)) ** power) / 2
 
@@ -134,8 +153,12 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
     # if z>0:
     #     angle +=np.py//4
     angle_3D = np.ones(np.shape(z)) * angle
-    shape = np.shape(angle_3D)
-    angle_3D[:, :, shape[2] // 2 :] *= 1.3
+    # shape = np.shape(angle_3D)
+    # angle_3D[:, :, shape[2] // 2 :] *= 1.3
+    print(braids_modification)
+    if braids_modification:
+        
+        angle_3D[:, :, A:B] += C
     # angle_3D_new = np.array(angle_3D).reshape((3, -1)).T
     # angle_3D_new[:, 2][len(angle_3D_new[:, 2])//3:] *= 1.3
     # angle_3D_new[:, 1][len(angle_3D_new[:, 2])//3:] *= 1.3
@@ -147,10 +170,10 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
     #     cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle)
 
 
-def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
+def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     xyz_array = [
         (mesh_3D[0], mesh_3D[1], mesh_3D[2]),
-        (mesh_3D[0], mesh_3D[1], mesh_3D[2])
+        #(mesh_3D[0], mesh_3D[1], mesh_3D[2])
     ]
     # starting angle for each braid
     angle_array = [0, 1. * np.pi]
@@ -164,7 +187,11 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
     # braid scaling
     a_cos_array = [1, 1]
     a_sin_array = [1, 1]
-    scale = [0.4, 0.4, np.pi]
+    
+    
+    
+    if braid_func is not braid:
+        scale = [0.8, 0.8, 1 * np.pi]
     if scale is not None:
         for i, xyz in enumerate(xyz_array):
             shape = np.shape(xyz)
@@ -182,31 +209,32 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid):
         a_cos_array = [1] * len(angle_array)
     if a_sin_array is None:
         a_sin_array = [1] * len(angle_array)
-
     for i, xyz in enumerate(xyz_array):
         if conj_array[i]:
             ans *= np.conjugate(braid_func(*xyz, angle_array[i], pow_cos_array[i], pow_sin_array[i], theta_array[i],
-                                           a_cos_array[i], a_sin_array[i]))
+                                           a_cos_array[i], a_sin_array[i],
+                                           braids_modification=braids_modification[i]))
         else:
             ans *= braid_func(*xyz, angle_array[i], pow_cos_array[i], pow_sin_array[i], theta_array[i],
-                              a_cos_array[i], a_sin_array[i])
-
+                              a_cos_array[i], a_sin_array[i],
+                              braids_modification=braids_modification[i])
+    
     return ans
 
 """used modules"""
-plot_milnor_field = 1
+plot_milnor_field = 0
 plot_milnor_lines = 1
 plot_braids = 1
-plot_real_field = 1
-plot_real_lines = 1
+plot_real_field = 0
+plot_real_lines = 0
 """beam parameters"""
 w = 1.2
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1., 1.)
-res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
+x_lim_3D, y_lim_3D, z_lim_3D = (-3, 3), (-3, 3), (-1, 1)
+res_x_3D, res_y_3D, res_z_3D = 91, 91, 91
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -270,7 +298,7 @@ width_gauss = 0.75
 
 new_function = functools.partial(LG_simple_xz, y=y_value, width_gauss=width_gauss)#, width=w * w_spec)
 
-field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_xz[1], width=width_gauss)
+# field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_xz[1], width=width_gauss)
 # plot_field(new_function(*mesh_2D_xz, l=1, p=1))
 # plot_field(np.load('trefoil3d.npy'))
 # plt.show()
@@ -279,21 +307,20 @@ field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_
 # plot_field(field_norm)
 # plt.show()
 # exit()
-values = LG_spectrum(
-    field_norm[:, y_ind, :], **moments, mesh=mesh_2D_xz, plot=True, width=w * w_spec, k0=1,
-    functions=new_function
-)
-# !!!!!!!!!!!
-# values = cbs.LG_spectrum(
-#     field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
+# values = LG_spectrum(
+#     field_norm[:, y_ind, :], **moments, mesh=mesh_2D_xz, plot=True, width=w * w_spec, k0=1,
+#     functions=new_function
 # )
+# !!!!!!!!!!!
+values = cbs.LG_spectrum(
+    field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
+)
 
 field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
 for l, p_array in enumerate(values):
     for p, value in enumerate(p_array):
         field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
                                              width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
-      
       
 
 if plot_real_field:
