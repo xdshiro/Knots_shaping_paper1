@@ -121,8 +121,9 @@ def v(x, y, z):
     denominator = x ** 2 + y ** 2 + z ** 2 + 1
     return numerator / denominator
 
-A, B, C = 40, 50, 0.25 * np.pi
-braids_modification = [True, True]
+A, B, C = -2 / 3 * np.pi,  2 / 3 * np.pi, 0.0 * np.pi
+# A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
+braids_modification = [True, False]
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
                                      braids_modification=None):
     def cos_v(x, y, z, power=1):
@@ -131,14 +132,26 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
     def sin_v(x, y, z, power=1):
         return (v(x, y, z) ** power - np.conj(v(x, y, z)) ** power) / 2j
     
-    angle_3D = np.ones(np.shape(z)) * angle
-    shape = np.shape(angle_3D)
-    # shape[2] // 2:
-    # angle_3D[:, :, A:B] *= C
-    # if braids_modification:
-    #     angle_3D[:, :, A:B] += C
+    
+    
     if braids_modification:
-        angle_3D[shape[0]//3 *2:, :, :] += C
+        # angle_3D = np.ones(np.shape(z))
+        # shape[2] // 2:
+        # angle_3D[:, :, A:B] *= C
+        # if braids_modification:
+        #     angle_3D[:, :, A:B] += C
+        # phase = np.zeros(np.shape(z)[:2])
+        # xAr, yAr, zAr = fg.arrays_from_mesh((x, y, z))
+        # mesh_XY = np.meshgrid(xAr, yAr)
+        phase = np.angle(x + 1j * y)
+        phase_mask = (phase >= A) & (phase <= B)
+        angle_3D = np.where(phase_mask, C + angle, angle)
+        # print(phase, phase.max(), phase.min(), np.shape(phase))
+        # phase = [np.angle(x + 1j * y) for x]
+        # angle_3D[shape[0]//3 *2:, :, :] += C
+        # exit()
+    else:
+        angle_3D = angle
     return u(x, y, z) * np.exp(1j * theta) - (
             cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
 
@@ -157,8 +170,10 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
     # angle_3D[:, :, shape[2] // 2 :] *= 1.3
     print(braids_modification)
     if braids_modification:
-        
-        angle_3D[:, :, A:B] += C
+        _, _, zAr = fg.arrays_from_mesh((x, y, z))
+        phase_mask = (zAr >= A) & (zAr <= B)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C
     # angle_3D_new = np.array(angle_3D).reshape((3, -1)).T
     # angle_3D_new[:, 2][len(angle_3D_new[:, 2])//3:] *= 1.3
     # angle_3D_new[:, 1][len(angle_3D_new[:, 2])//3:] *= 1.3
@@ -173,7 +188,7 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     xyz_array = [
         (mesh_3D[0], mesh_3D[1], mesh_3D[2]),
-        #(mesh_3D[0], mesh_3D[1], mesh_3D[2])
+        (mesh_3D[0], mesh_3D[1], mesh_3D[2])
     ]
     # starting angle for each braid
     angle_array = [0, 1. * np.pi]
@@ -191,7 +206,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     
     
     if braid_func is not braid:
-        scale = [0.8, 0.8, 1 * np.pi]
+        scale = [0.5, 0.5, 1 * np.pi]
     if scale is not None:
         for i, xyz in enumerate(xyz_array):
             shape = np.shape(xyz)
@@ -222,18 +237,18 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     return ans
 
 """used modules"""
-plot_milnor_field = 0
+plot_milnor_field = 1
 plot_milnor_lines = 1
 plot_braids = 1
-plot_real_field = 0
-plot_real_lines = 0
+plot_real_field = 1
+plot_real_lines = 1
 """beam parameters"""
 w = 1.2
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-3, 3), (-3, 3), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-5, 5), (-5, 5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 91, 91, 91
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
@@ -330,7 +345,7 @@ if plot_real_field:
     plt.show()
 
 if plot_real_lines:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
     plt.show()
 ###################################################################
