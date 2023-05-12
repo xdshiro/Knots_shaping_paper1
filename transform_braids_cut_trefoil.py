@@ -6,6 +6,8 @@ import numpy as np
 from scipy.special import assoc_laguerre
 import my_functions.functions_general as fg
 import math
+import scipy.io
+
 def gauss_z(x, y, z, width):
     return np.exp(-z ** 2 / width ** 2)
 
@@ -122,6 +124,7 @@ def v(x, y, z):
     return numerator / denominator
 
 A, B, C = -2 / 3 * np.pi,  2 / 3 * np.pi, 0.0 * np.pi
+# A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 braids_modification = [True, False]
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -146,14 +149,22 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
         phase = np.angle(x + 1j * y)
         phase_mask = (phase >= A) & (phase <= B)
         angle_3D = np.where(phase_mask, C + angle, angle)
+        x[phase_mask] /= 1.2
+        a_cos_3D = np.ones(np.shape(z)) * a_cos
+        a_sin_3D = np.ones(np.shape(z)) * a_sin
+        a_cos_3D[phase_mask] *= 1.2
+        a_sin_3D[phase_mask] *= 1.2
         # print(phase, phase.max(), phase.min(), np.shape(phase))
         # phase = [np.angle(x + 1j * y) for x]
         # angle_3D[shape[0]//3 *2:, :, :] += C
         # exit()
     else:
         angle_3D = angle
+        a_cos_3D = a_cos
+        a_sin_3D = a_sin
     return u(x, y, z) * np.exp(1j * theta) - (
-            cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
+            cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
+            # cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
 
 
 def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -174,13 +185,20 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
         phase_mask = (zAr >= A) & (zAr <= B)
         indexes = np.where(phase_mask)
         angle_3D[:, :, indexes] += C
+        a_cos_3D = np.ones(np.shape(z)) * a_cos
+        a_sin_3D = np.ones(np.shape(z)) * a_sin
+        a_cos_3D[:, :, indexes] *= 1.2
+        a_sin_3D[:, :, indexes] *= 1.2
+    else:
+        a_cos_3D = a_cos
+        a_sin_3D = a_sin
     # angle_3D_new = np.array(angle_3D).reshape((3, -1)).T
     # angle_3D_new[:, 2][len(angle_3D_new[:, 2])//3:] *= 1.3
     # angle_3D_new[:, 1][len(angle_3D_new[:, 2])//3:] *= 1.3
     # angle_3D_new[:, 0][len(angle_3D_new[:, 2])//3:] *= 1.3
     # angle_3D = angle_3D_new.T.reshape(shape)
     return (x + 1j * y) * np.exp(1j * theta) - (
-        cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
+        cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
     # return (x + 1j * y) * np.exp(1j * theta) - (
     #     cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle)
 
@@ -202,28 +220,24 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     # braid scaling
     a_cos_array = [1, 1]
     a_sin_array = [1, 1]
-    
-    
-    
-    if braid_func is not braid:
-        scale = [0.5, 0.5, 1 * np.pi]
-    if scale is not None:
-        for i, xyz in enumerate(xyz_array):
-            shape = np.shape(xyz)
-            # print(np.array(xyz).reshape((3, -1)))
-            xyz_new = np.array(xyz).reshape((3, -1)).T * scale
-            xyz_array[i] = tuple(xyz_new.T.reshape(shape))
-    # shape = np.shape(xyz_array[1])
-    # xyz_new = np.array(xyz_array[1]).reshape((3, -1)).T
-    # xyz_new[:, 2][len(xyz_new[:, 2])//3:] += np.pi//4
-    # xyz_array[1] = tuple(xyz_new.T.reshape(shape))
-    ans = 1
+
     if theta_array is None:
         theta_array = [0] * len(angle_array)
     if a_cos_array is None:
         a_cos_array = [1] * len(angle_array)
     if a_sin_array is None:
         a_sin_array = [1] * len(angle_array)
+    
+    if braid_func is not braid:
+        scale = [0.5, 0.5, 1 * np.pi]
+    if scale is not None:
+        for i, xyz in enumerate(xyz_array):
+            shape = np.shape(xyz)
+            xyz_new = np.array(xyz).reshape((3, -1)).T * scale
+            xyz_array[i] = tuple(xyz_new.T.reshape(shape))
+
+    ans = 1
+
     for i, xyz in enumerate(xyz_array):
         if conj_array[i]:
             ans *= np.conjugate(braid_func(*xyz, angle_array[i], pow_cos_array[i], pow_sin_array[i], theta_array[i],
@@ -248,7 +262,7 @@ w = 1.2
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-5, 5), (-5, 5), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 91, 91, 91
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
@@ -310,6 +324,7 @@ values_total = 0
 y_value = 0
 w_spec = 1
 width_gauss = 0.75
+width_gauss = 1
 
 new_function = functools.partial(LG_simple_xz, y=y_value, width_gauss=width_gauss)#, width=w * w_spec)
 
@@ -332,11 +347,16 @@ values = cbs.LG_spectrum(
 )
 
 field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
+total = 0
+weights_important = {}
 for l, p_array in enumerate(values):
     for p, value in enumerate(p_array):
-        field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                             width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
-      
+        if abs(value) > 0.01 * abs(values).max():
+            total += 1
+            weights_important[f'{l + moment0}, {p}'] = value
+            field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+                                                width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+scipy.io.savemat('weights_trefoil_standard_w12.mat', weights_important)
 
 if plot_real_field:
     plot_field(field_new_3D)
