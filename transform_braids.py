@@ -13,7 +13,7 @@ w = 1.2
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-5, 5)}
 """mesh parameters"""
-x_lim_3D, y_lim_3D, z_lim_3D = (-5, 5), (-5, 5), (-1.5, 1.5)
+x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1., 1.0)
 res_x_3D, res_y_3D, res_z_3D = 81, 81, 81
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
