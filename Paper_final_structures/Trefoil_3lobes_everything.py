@@ -133,14 +133,10 @@ def v(x, y, z):
     return numerator / denominator
 
 
-A, B, C = -2 / 3 * np.pi, 2 / 3 * np.pi, np.pi * 0.25
-braid_scale = 1.0  # 1.2
-x_scale = 1  # 1/1.2
-x_shift = 0  # 0.5
-z_shift = -0.3  # 0.4
+
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
-braids_modification = [True, False]
+C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0, 0
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -154,29 +150,54 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
     x_new = np.array(x)
     y_new = np.array(y)
     z_new = np.array(z)
-    if braids_modification:
-        # angle_3D = np.ones(np.shape(z))
-        # shape[2] // 2:
-        # angle_3D[:, :, A:B] *= C
-        # if braids_modification:
-        #     angle_3D[:, :, A:B] += C
-        # phase = np.zeros(np.shape(z)[:2])
-        # xAr, yAr, zAr = fg.arrays_from_mesh((x, y, z))
-        # mesh_XY = np.meshgrid(xAr, yAr)
-        phase = np.angle(x + 1j * y)
+    angle_3D = np.ones(np.shape(z)) * angle
+    a_cos_3D = np.ones(np.shape(z)) * a_cos
+    a_sin_3D = np.ones(np.shape(z)) * a_sin
+    phase = np.angle(x + 1j * y)
+    if braids_modification == 0:
+
+        print('Braid 1:\nLobe 1')
+        A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+        braid_scale = 1.0  # 1.2
+        x_scale = 1  # 1/1.2
+        x_shift = 0  # 0.5
+        z_shift = -0.0 # 0.4
         phase_mask = (phase >= A) & (phase <= B)
-        angle_3D = np.where(phase_mask, C + angle, angle)
-        x_new[phase_mask] *= x_scale
-        x_new[phase_mask] += x_shift
-        z_new[phase_mask] += z_shift
-        a_cos_3D = np.ones(np.shape(z)) * a_cos
-        a_sin_3D = np.ones(np.shape(z)) * a_sin
-        a_cos_3D[phase_mask] *= braid_scale
-        a_sin_3D[phase_mask] *= braid_scale
-        # print(phase, phase.max(), phase.min(), np.shape(phase))
-        # phase = [np.angle(x + 1j * y) for x]
-        # angle_3D[shape[0]//3 *2:, :, :] += C
-        # exit()
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe1
+        # x_new[phase_mask] *= x_scale
+        # x_new[phase_mask] += x_shift
+        # z_new[phase_mask] += z_shift
+        # a_cos_3D = np.ones(np.shape(z)) * a_cos
+        # a_sin_3D = np.ones(np.shape(z)) * a_sin
+        # a_cos_3D[phase_mask] *= braid_scale
+        # a_sin_3D[phase_mask] *= braid_scale
+        # Lobe 2
+        print('Lobe 2')
+        A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+        phase_mask = (phase <= A)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe2
+        # Lobe 3
+        print('Lobe 3')
+        A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+        phase_mask = (phase >= B)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe3
+
+    elif braids_modification == 1:
+        # Lobe 2
+        print('Braid 2\nLobe 2')
+        A, B = 0, 0
+        phase_mask = (phase >= B)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe2
+        # Lobe 3
+        print('Lobe 3')
+        A, B = 0, 0
+        phase_mask = (phase <= A)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe3
     else:
         x_new = x
         y_new = y
@@ -201,26 +222,56 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
     # if z>0:
     #     angle +=np.py//4
     angle_3D = np.ones(np.shape(z)) * angle
+    a_cos_3D = np.ones(np.shape(z)) * a_cos
+    a_sin_3D = np.ones(np.shape(z)) * a_sin
+    _, _, zAr = fg.arrays_from_mesh((x, y, z))
     # shape = np.shape(angle_3D)
     # angle_3D[:, :, shape[2] // 2 :] *= 1.3
-    print(braids_modification)
-    if braids_modification:
-        _, _, zAr = fg.arrays_from_mesh((x, y, z))
+    if braids_modification == 0:
+
+        print('Braid 1:\nLobe 1')
+        A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+        braid_scale = 1.0  # 1.2
+        x_scale = 1  # 1/1.2
+        x_shift = 0  # 0.5
+        z_shift = -0.2  # 0.4
         phase_mask = (zAr >= A) & (zAr <= B)
         indexes = np.where(phase_mask)
-        angle_3D[:, :, indexes] += C
-        a_cos_3D = np.ones(np.shape(z)) * a_cos
-        a_sin_3D = np.ones(np.shape(z)) * a_sin
-        a_cos_3D[:, :, indexes] *= braid_scale
-        a_sin_3D[:, :, indexes] *= braid_scale
-    else:
-        a_cos_3D = a_cos
-        a_sin_3D = a_sin
-    # angle_3D_new = np.array(angle_3D).reshape((3, -1)).T
-    # angle_3D_new[:, 2][len(angle_3D_new[:, 2])//3:] *= 1.3
-    # angle_3D_new[:, 1][len(angle_3D_new[:, 2])//3:] *= 1.3
-    # angle_3D_new[:, 0][len(angle_3D_new[:, 2])//3:] *= 1.3
-    # angle_3D = angle_3D_new.T.reshape(shape)
+        angle_3D[:, :, indexes] += C_lobe1
+        # x_new[phase_mask] *= x_scale
+        # x_new[phase_mask] += x_shift
+        # z_new[phase_mask] += z_shift
+        # a_cos_3D = np.ones(np.shape(z)) * a_cos
+        # a_sin_3D = np.ones(np.shape(z)) * a_sin
+        # a_cos_3D[phase_mask] *= braid_scale
+        # a_sin_3D[phase_mask] *= braid_scale
+        # Lobe 2
+        print('Lobe 2')
+        A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+        phase_mask = (zAr <= A)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe2
+        # Lobe 3
+        print('Lobe 3')
+        A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+        phase_mask = (zAr >= B)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe3
+
+    elif braids_modification == 1:
+        # Lobe 2
+        print('Braid 2\nLobe 2')
+        A, B = 0, 0
+        phase_mask = (zAr >= B)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe2
+        # Lobe 3
+        print('Lobe 3')
+        A, B = 0, 0
+        phase_mask = (zAr <= A)
+        indexes = np.where(phase_mask)
+        angle_3D[:, :, indexes] += C_lobe3
+
     return (x + 1j * y) * np.exp(1j * theta) - (
             cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
     # return (x + 1j * y) * np.exp(1j * theta) - (
@@ -244,6 +295,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     # braid scaling
     a_cos_array = [1, 1]
     a_sin_array = [1, 1]
+    braids_modification = [0, 1]
 
     if theta_array is None:
         theta_array = [0] * len(angle_array)
@@ -278,7 +330,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 """used modules"""
 plot_milnor_field = 1
 plot_milnor_lines = 1
-plot_braids = 0
+plot_braids = 1
 plot_real_field = 1
 plot_real_lines = 1
 """beam parameters"""
@@ -288,7 +340,7 @@ w = 1.3
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 91, 91, 91
+res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
