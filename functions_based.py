@@ -179,16 +179,16 @@ def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmap='afmhot', i
     plt.subplots(1, 2, figsize=(11, 5))
     plt.subplot(1, 2, 1)
     if intensity:
-        plt.imshow(np.abs(field2D) ** 2, cmap=cmap, interpolation='nearest')
+        plt.imshow(np.abs(field2D.T) ** 2, cmap=cmap, interpolation='nearest')
     else:
-        plt.imshow(np.abs(field2D), cmap=cmap, interpolation='nearest')
+        plt.imshow(np.abs(field2D.T), cmap=cmap, interpolation='nearest')
     plt.colorbar(fraction=0.04, pad=0.02)
     plt.title(titles[0])
     if not axes:
         plt.tick_params(top=False, bottom=False, left=False, right=False,
                         labelleft=False, labelbottom=False)
     plt.subplot(1, 2, 2)
-    plt.imshow(np.angle(field2D), cmap='jet', interpolation='nearest')  # , cmap='twilight', interpolation='nearest'
+    plt.imshow(np.angle(field2D.T), cmap='jet', interpolation='nearest')  # , cmap='twilight', interpolation='nearest'
     plt.colorbar(fraction=0.04, pad=0.02)
     plt.title(titles[1])
     if not axes:
