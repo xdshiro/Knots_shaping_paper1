@@ -136,17 +136,17 @@ def v(x, y, z):
 """used modules"""
 plot_milnor_field = 1
 plot_milnor_lines = 1
-plot_braids = 1
-plot_real_field = 1
-plot_real_lines = 1
+plot_braids = 0
+plot_real_field = 0
+plot_real_lines = 0
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-shift = 0.0  # 0.2
-x_shift1, x_shift2, x_shift3 = +shift * 0, -shift * np.sin(np.pi / 6) * 0, -shift * np.sin(np.pi / 6)
-y_shift1, y_shift2, y_shift3 = -0.0, +shift * np.cos(np.pi / 6) * 0, -shift * np.cos(np.pi / 6)
+C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
+shift = 0.4  # 0.2
+x_shift1, x_shift2, x_shift3 = +shift * 0, -shift * np.sin(np.pi / 6) * 0, -shift * np.sin(np.pi / 6) * 1
+y_shift1, y_shift2, y_shift3 = -0.0, +shift * np.cos(np.pi / 6) * 0, -shift * np.cos(np.pi / 6) * 1
 z_shift1, z_shift2, z_shift3 = -0.0, 0, 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 121, 121, 121
@@ -203,7 +203,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             # Lobe 3
             print('Lobe 3')
             A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            phase_mask = (phase > B) & (phase < np.pi)
+            phase_mask = (phase > B) & (phase < np.pi * 1)
             angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
@@ -222,7 +222,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             print('Lobe 3')
             A, B = 0, 0
             phase_mask = (phase <= A)
-            phase_mask = (phase < A) & (phase > -np.pi)
+            phase_mask = (phase < A) & (phase > -np.pi * 1)
             # angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
