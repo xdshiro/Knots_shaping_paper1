@@ -151,7 +151,7 @@ y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shif
 z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 131, 131, 131
+res_x_3D, res_y_3D, res_z_3D = 211, 211, 91
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
