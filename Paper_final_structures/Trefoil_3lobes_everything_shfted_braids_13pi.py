@@ -135,8 +135,9 @@ def v(x, y, z):
 
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = 1
+plot_milnor_lines = 0
 plot_braids = 0
+real_field = 0
 plot_real_field = 1
 plot_real_lines = 1
 
@@ -145,13 +146,15 @@ plot_real_lines = 1
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
 C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
 shift = 0.3  # 0.2
-l1, l2, l3 = 1, 1, 1
+l1, l2, l3 = 0, 0, 0
 x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
 z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
+x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
+y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -177,6 +180,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             # plot_field(x_new)
             # plt.show()
             print('Braid 1:\nLobe 1')
+            A, B = -3 / 3 * np.pi, 1 / 3 * np.pi
             A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
             # braid_scale = 1.0  # 1.2
             # x_scale = 1  # 1/1.2
@@ -244,7 +248,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
     #     angle_3D = angle
     #     a_cos_3D = a_cos
     #     a_sin_3D = a_sin
-    if braids_modification in [0, 1]:
+    if braids_modification in [braids_modification]:  # [0, 1] for turning off the braids
         return u(x_new, y_new, z_new) * np.exp(1j * theta) - (
                 cos_v(x_new, y_new, z_new, pow_cos) / a_cos_3D + 1j
                 * sin_v(x_new, y_new, z_new, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
@@ -375,7 +379,8 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
         (mesh_3D[0], mesh_3D[1], mesh_3D[2])
     ]
     # starting angle for each braid
-    angle_array = np.array([0, 1. * np.pi])
+    angle_array = np.array([0, 1. * np.pi]) + np.pi##0 * np.pi/3
+    print(angle_array)
     # powers in cos in sin
     pow_cos_array = [1.5, 1.5]
     pow_sin_array = [1.5, 1.5]
@@ -387,6 +392,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     a_cos_array = [1, 1]
     a_sin_array = [1, 1]
     braids_modification = [0, 1]
+    # braids_modification = [5, 6]
 
     if theta_array is None:
         theta_array = [0] * len(angle_array)
@@ -419,7 +425,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 
 
 """beam parameters"""
-w = 1.1
+w = 1.3
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
@@ -521,39 +527,40 @@ field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # !!!!!!!!!!!
 
 ##################################################################################################
-values = cbs.LG_spectrum(
-    field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
-)
-# values = LG_spectrum(
-#     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
-#     functions=new_function
-# )
-
-field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
-total = 0
-l_save = []
-p_save = []
-weight_save = []
-
-for l, p_array in enumerate(values):
-    for p, value in enumerate(p_array):
-        if abs(value) > 0.01 * abs(values).max():
-            total += 1
-            l_save.append(l + moment0)
-            p_save.append(p)
-            weight_save.append(value)
-            # weights_important[f'{l + moment0}, {p}'] = value
-            field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                                 width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
-weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
-scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
-if plot_real_field:
+if real_field:
+    values = cbs.LG_spectrum(
+        field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
+    )
+    # values = LG_spectrum(
+    #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
+    #     functions=new_function
+    # )
+    
+    field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
+    total = 0
+    l_save = []
+    p_save = []
+    weight_save = []
+    
+    for l, p_array in enumerate(values):
+        for p, value in enumerate(p_array):
+            if abs(value) > 0.01 * abs(values).max():
+                total += 1
+                l_save.append(l + moment0)
+                p_save.append(p)
+                weight_save.append(value)
+                # weights_important[f'{l + moment0}, {p}'] = value
+                field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+                                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+    # weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+if plot_real_field and real_field:
     plot_field(field_new_3D, intensity=False)
     plt.show()
     plot_field(field_new_3D[:, y_ind, :])
     plt.show()
 
-if plot_real_lines:
+if plot_real_lines and real_field:
     _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
     plt.show()
