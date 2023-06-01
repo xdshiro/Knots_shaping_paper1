@@ -148,11 +148,11 @@ C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
 shift = 0.3  # 0.2
 BETTA = np.pi / 3
 ALPHA = BETTA * (2 / 3) / 1
-l1, l2, l3 = 0, 0, 0
+l1, l2, l3 = 0, 1, 0
 # x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 # y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
 z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
-x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-0.9, 0.9)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
 x_shift1 = +shift * np.cos(ALPHA) * l1
@@ -273,7 +273,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
     #     angle_3D = angle
     #     a_cos_3D = a_cos
     #     a_sin_3D = a_sin
-    if braids_modification in [1]:  # [braids_modification]:  # [0, 1] for turning off the braids
+    if braids_modification in [braids_modification]:  # [braids_modification]:  # [0, 1] for turning off the braids
         return u(x_new, y_new, z_new) * np.exp(1j * theta) - (
                 cos_v(x_new, y_new, z_new, pow_cos) / a_cos_3D + 1j
                 * sin_v(x_new, y_new, z_new, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
