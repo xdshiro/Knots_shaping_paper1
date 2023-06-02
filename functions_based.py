@@ -196,24 +196,24 @@ def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmap='afmhot', i
                         labelleft=False, labelbottom=False)
     plt.tight_layout()
 
-
-beam_rotation_test = False
-if beam_rotation_test:
-    x_lim_3D, y_lim_3D, z_lim_3D = np.linspace(-2, 2, 50), np.linspace(-2, 2, 50), np.linspace(-2, 2, 50)
-    mesh_3D = np.meshgrid(x_lim_3D, y_lim_3D, z_lim_3D, indexing='ij')
-    mesh_3D = rotate_meshgrid(*mesh_3D, np.radians(45), np.radians(30), np.radians(30))
-    # Hopf Dennis  (0, 0) 2.63; (0, 1) −6.32; (0, 2) 4.21; (2, 0) −5.95).
-    beam = (
-            +2.63 * bp.LG_simple(*mesh_3D, l=0, p=0) +
-            -6.31 * bp.LG_simple(*mesh_3D, l=0, p=1) +
-            +4.21 * bp.LG_simple(*mesh_3D, l=0, p=2) +
-            -5.95 * bp.LG_simple(*mesh_3D, l=2, p=0)
-    )
-    # plt.imshow(np.angle(beam[:, :, 25]))
-    # plt.show()
-    # exit()
-    _, dots_init = sing.get_singularities(np.angle(beam), axesAll=True, returnDict=True)
-    boundary_3D = [[0, 0, 0], [len(x_lim_3D), len(y_lim_3D), len(z_lim_3D)]]
-    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
-    plt.show()
-    exit()
+if __name__ == "_main_":
+    beam_rotation_test = True
+    if beam_rotation_test:
+        x_lim_3D, y_lim_3D, z_lim_3D = np.linspace(-2, 2, 50), np.linspace(-2, 2, 50), np.linspace(-2, 2, 50)
+        mesh_3D = np.meshgrid(x_lim_3D, y_lim_3D, z_lim_3D, indexing='ij')
+        mesh_3D = rotate_meshgrid(*mesh_3D, np.radians(45), np.radians(30), np.radians(30))
+        # Hopf Dennis  (0, 0) 2.63; (0, 1) −6.32; (0, 2) 4.21; (2, 0) −5.95).
+        beam = (
+                +2.63 * bp.LG_simple(*mesh_3D, l=0, p=0) +
+                -6.31 * bp.LG_simple(*mesh_3D, l=0, p=1) +
+                +4.21 * bp.LG_simple(*mesh_3D, l=0, p=2) +
+                -5.95 * bp.LG_simple(*mesh_3D, l=2, p=0)
+        )
+        # plt.imshow(np.angle(beam[:, :, 25]))
+        # plt.show()
+        # exit()
+        _, dots_init = sing.get_singularities(np.angle(beam), axesAll=True, returnDict=True)
+        boundary_3D = [[0, 0, 0], [len(x_lim_3D), len(y_lim_3D), len(z_lim_3D)]]
+        dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
+        plt.show()
+        exit()
