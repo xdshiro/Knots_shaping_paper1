@@ -143,17 +143,18 @@ plot_real_lines = 1
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-x_lobe1, x_lobe2 = 1, 1
-# x_lobe1, x_lobe2 = 0.83, 0.83
+# x_scale1, x_scale2 = 1, 1
+x_scale1, x_scale2 = 0.83, 0.83
+# Check the order!!!!!!!!!!!!!!!!!!!!!!
 y_lobe1, y_lobe2 = 1, 1
-C_lobe1, C_lobe2 = 0 / 6 * np.pi, 0.0 * np.pi
-C_lobe1, C_lobe2 = np.arctan(np.tan(C_lobe1) / x_lobe1), C_lobe2 * 00
+C_lobe1, C_lobe2 = 1 / 6 * np.pi, 0.0 * np.pi
+C_lobe1, C_lobe2 = np.arctan(np.tan(C_lobe1) / x_scale1), C_lobe2 * 00
 
 
-a_cos_array_CONST = [1, 1]
-a_sin_array_CONST = [1, 1]
-# a_cos_array_CONST = [1.3, 1.3]
-# a_sin_array_CONST = [1.3, 1.3]
+# a_cos_array_CONST = [1, 1]
+# a_sin_array_CONST = [1, 1]
+a_cos_array_CONST = [1.3, 1.3]
+a_sin_array_CONST = [1.3, 1.3]
 # shift = 0.3  # 0.2
 shift = 0.0  # 0.2
 l1, l2, l3 = 1, 0, 0
@@ -163,15 +164,15 @@ x_shift1 = +shift * np.cos(C_lobe1) * l1
 y_shift1 = -shift * np.sin(C_lobe1) * l1
 x_shift2 = -shift * np.cos(C_lobe2) * l2
 y_shift2 = -shift * np.sin(C_lobe2) * l2
-# z_shift1 = - 0.35
-z_shift1 = 0
+z_shift1 = - 0.35
+# z_shift1 = 0
 z_shift2 = 0
 # z_shift2 = - 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-6.0, 6.0), (-6.0, 6.0), (-1.5, 1.5)
-x_lim_3D, y_lim_3D, z_lim_3D = (-8.0, 8.0), (-8.0, 8.0), (-0.1, 0.1)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-8.0, 8.0), (-8.0, 8.0), (-0.1, 0.1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
-res_x_3D, res_y_3D, res_z_3D = 120, 120, 61
+# res_x_3D, res_y_3D, res_z_3D = 120, 120, 61
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -209,13 +210,13 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			angle_3D[phase_mask] += C_lobe1
 			# x_new[phase_mask] *= x_scale
 			# angle_3D[phase_mask] += C_lobe2
-			x_new[phase_mask] *= x_lobe1
-			y_new[phase_mask] *= y_lobe1
+			# x_new[phase_mask] *= x_scale1
+			# y_new[phase_mask] *= y_lobe1
 			x_new[phase_mask] += x_shift1
 			y_new[phase_mask] += y_shift1
 			z_new[phase_mask] += z_shift1
-			# x_new[phase_mask] *= x_lobe1
-			# y_new[phase_mask] *= y_lobe1
+			x_new[phase_mask] *= x_scale1
+			y_new[phase_mask] *= y_lobe1
 		# plot_field(x_new)
 		# plt.show()
 		elif braids_modification == 1:
@@ -225,13 +226,13 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			A, B = -3 / 3 * np.pi, 3 / 3 * np.pi
 			phase_mask = (phase >= A) & (phase <= B)
 			angle_3D[phase_mask] += C_lobe2
-			x_new[phase_mask] *= x_lobe2
-			y_new[phase_mask] *= y_lobe2
+			# x_new[phase_mask] *= x_scale2
+			# y_new[phase_mask] *= y_lobe2
 			x_new[phase_mask] += x_shift2
 			y_new[phase_mask] += y_shift2
 			z_new[phase_mask] += z_shift2
-			# x_new[phase_mask] *= x_lobe2
-			# y_new[phase_mask] *= y_lobe2
+			x_new[phase_mask] *= x_scale2
+			y_new[phase_mask] *= y_lobe2
 
 		# plot_field(x_new)
 		# plt.show()
@@ -322,9 +323,10 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 	# mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(45), np.radians(30), np.radians(30))
-	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180-44), np.radians(00), np.radians(0))
-	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180+44), np.radians(00), np.radians(0))
-	# mesh_3D_rotated_2 =mesh_3D
+	# mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180-44), np.radians(00), np.radians(0))
+	# mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180+44), np.radians(00), np.radians(0))
+	mesh_3D_rotated = mesh_3D
+	mesh_3D_rotated_2 = mesh_3D
 	xyz_array = [
 		(mesh_3D_rotated_2[0], mesh_3D_rotated_2[1], mesh_3D_rotated_2[2]),
 		(mesh_3D_rotated[0], mesh_3D_rotated[1], mesh_3D_rotated[2])
@@ -518,7 +520,7 @@ if plot_real_field:
 	plt.show()
 
 if plot_real_lines:
-	_, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
+	_, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
 	dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
 	plt.show()
 ###################################################################

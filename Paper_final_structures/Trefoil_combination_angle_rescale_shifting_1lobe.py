@@ -133,7 +133,7 @@ def v(x, y, z):
     return numerator / denominator
 
 
-A, B, C = -2 / 3 * np.pi, 2 / 3 * np.pi, np.pi * 0.25
+A, B, C = -2 / 3 * np.pi, 2 / 3 * np.pi, np.pi * 1 / 6 * 3 / 2
 braid_scale = 1.0  # 1.2
 x_scale = 1  # 1/1.2
 x_shift = 0  # 0.5
@@ -277,8 +277,8 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = 1
-plot_braids = 1
+plot_milnor_lines = 0
+plot_braids = 0
 plot_real_field = 1
 plot_real_lines = 1
 """beam parameters"""
@@ -288,7 +288,7 @@ w = 1.3
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
+res_x_3D, res_y_3D, res_z_3D = 91, 91, 91
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)

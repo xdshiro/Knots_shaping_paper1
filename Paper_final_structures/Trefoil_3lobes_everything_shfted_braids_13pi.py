@@ -135,7 +135,7 @@ def v(x, y, z):
 
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = 1
+plot_milnor_lines = 0
 plot_braids = 0
 real_field = 0
 plot_real_field = 1
@@ -161,6 +161,7 @@ y_shift1 = -shift * np.sin(ALPHA) * l1
 # y_shift2 = +shift * np.cos(np.pi / 6 - ALPHA) * l2
 # x_shift3 = -shift * np.sin(np.pi / 6 + ALPHA) * l3
 # y_shift3 = -shift * np.cos(np.pi / 6 + ALPHA) * l3
+
 x_shift2 = -shift * np.sin(np.pi / 6 + ALPHA) * l2
 y_shift2 = -shift * np.cos(np.pi / 6 + ALPHA) * l2
 x_shift3 = -shift * np.sin(np.pi / 6 - ALPHA) * l3
@@ -579,7 +580,7 @@ if plot_real_field and real_field:
     plt.show()
 
 if plot_real_lines and real_field:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
     plt.show()
 ###################################################################

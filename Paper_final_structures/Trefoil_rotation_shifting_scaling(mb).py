@@ -135,7 +135,7 @@ def v(x, y, z):
 
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = 1
+plot_milnor_lines = 0
 plot_braids = 0
 plot_real_field = 1
 plot_real_lines = 1
@@ -143,15 +143,15 @@ plot_real_lines = 1
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-shift = 0.3  # 0.2
-l1, l2, l3 = 0, 1, 0
+C_lobe1, C_lobe2, C_lobe3 = np.pi * 1 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
+shift = 0.5  # 0.2
+l1, l2, l3 = 0, 0, 0
 x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
 z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
+res_x_3D, res_y_3D, res_z_3D = 81, 81, 81
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -419,7 +419,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 
 
 """beam parameters"""
-w = 1.1
+w = 1.3
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}

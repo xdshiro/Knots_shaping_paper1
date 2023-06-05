@@ -85,34 +85,34 @@ if False:
     plt.show()
 
 # %%
-x_lim_3D, y_lim_3D, z_lim_3D = (-11, 11), (-11, 11), (-1.0, 1.0)
-res_x_3D, res_y_3D, res_z_3D = 71, 71, 71
-x_3D = np.linspace(*x_lim_3D, res_x_3D)
-y_3D = np.linspace(*y_lim_3D, res_y_3D)
-z_3D = np.linspace(*z_lim_3D, res_z_3D)
-mesh_3D = np.meshgrid(x_3D, y_3D, z_3D, indexing='ij')  #
-R = np.sqrt(mesh_3D[0] ** 2 + mesh_3D[1] ** 2)
-boundary_3D = [[0, 0, 0], [res_xy_3D, res_xy_3D, res_z_3D]]
-"""creating the field"""
-# mesh for each brade (in "Milnor" space)
-xyz_array = [
-    (mesh_3D_rotated[0], mesh_3D_rotated[1], mesh_3D_rotated[2]),
-    (mesh_3D_rotated2[0], mesh_3D_rotated2[1], mesh_3D_rotated2[2])
-]
-# starting angle for each braid
-angle_array = [0, 1 * np.pi]
-# powers in cos in sin
-pow_cos_array = [1, 1]
-pow_sin_array = [1, 1]
-# conjugating the braid (in "Milnor" space)
-conj_array = [0, 0]
-# moving x+iy (same as in the paper)
-theta_array = [0.0 * np.pi, 0 * np.pi]
-
-a_cos_array = [1, 1]
-a_sin_array = [1, 1]
+# x_lim_3D, y_lim_3D, z_lim_3D = (-11, 11), (-11, 11), (-1.0, 1.0)
+# res_x_3D, res_y_3D, res_z_3D = 71, 71, 71
+# x_3D = np.linspace(*x_lim_3D, res_x_3D)
+# y_3D = np.linspace(*y_lim_3D, res_y_3D)
+# z_3D = np.linspace(*z_lim_3D, res_z_3D)
+# mesh_3D = np.meshgrid(x_3D, y_3D, z_3D, indexing='ij')  #
+# R = np.sqrt(mesh_3D[0] ** 2 + mesh_3D[1] ** 2)
+# boundary_3D = [[0, 0, 0], [res_xy_3D, res_xy_3D, res_z_3D]]
+# """creating the field"""
+# # mesh for each brade (in "Milnor" space)
+# xyz_array = [
+#     (mesh_3D_rotated[0], mesh_3D_rotated[1], mesh_3D_rotated[2]),
+#     (mesh_3D_rotated2[0], mesh_3D_rotated2[1], mesh_3D_rotated2[2])
+# ]
+# # starting angle for each braid
+# angle_array = [0, 1 * np.pi]
+# # powers in cos in sin
+# pow_cos_array = [1, 1]
+# pow_sin_array = [1, 1]
+# # conjugating the braid (in "Milnor" space)
+# conj_array = [0, 0]
+# # moving x+iy (same as in the paper)
+# theta_array = [0.0 * np.pi, 0 * np.pi]
+#
+# a_cos_array = [1, 1]
+# a_sin_array = [1, 1]
 ####################################################################
-exit()
+# exit()
 w = 2.5
 w_spec = 1
 z_value_array = [0.0 * w ** 2]
