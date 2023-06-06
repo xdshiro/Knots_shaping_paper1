@@ -137,36 +137,37 @@ def v(x, y, z):
 plot_milnor_field = 1
 plot_milnor_lines = 0
 plot_braids = 0
-real_field = 0
+real_field = 1
 plot_real_field = 1
 plot_real_lines = 1
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
+x_scale1 = 1
+y_scale1 = 1
+C_lobe1, C_lobe2, C_lobe3 = np.pi * 1 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
 shift = 0.3  # 0.2
-BETTA = np.pi / 3
+BETTA = 0 / 3
 ALPHA = BETTA * (2 / 3) / 1
-l1, l2, l3 = 0, 1, 0
+l1, l2, l3 = 0, 0, -0.5
 # x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 # y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
-z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
-x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-0.9, 0.9)
+z_shift1, z_shift2, z_shift3 = -0.3, 0.2, 0.3
+x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 11
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
 # y_shift2 = +shift * np.cos(np.pi / 6 - ALPHA) * l2
 # x_shift3 = -shift * np.sin(np.pi / 6 + ALPHA) * l3
 # y_shift3 = -shift * np.cos(np.pi / 6 + ALPHA) * l3
-
 x_shift2 = -shift * np.sin(np.pi / 6 + ALPHA) * l2
-y_shift2 = -shift * np.cos(np.pi / 6 + ALPHA) * l2
+y_shift2 = +shift * np.cos(np.pi / 6 + ALPHA) * l2
 x_shift3 = -shift * np.sin(np.pi / 6 - ALPHA) * l3
-y_shift3 = +shift * np.cos(np.pi / 6 - ALPHA) * l3
+y_shift3 = -shift * np.cos(np.pi / 6 - ALPHA) * l3
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
           braids_modification=None):
@@ -191,13 +192,13 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             # plot_field(x_new)
             # plt.show()
             print('Braid 1:\nLobe 1')
-            A, B = -3 / 3 * np.pi, 1 / 3 * np.pi
-            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
             # braid_scale = 1.0  # 1.2
             # x_scale = 1  # 1/1.2
             # x_shift = 0  # 0.5
 
-            phase_mask = (phase >= A) & (phase <= B)
+            # phase_mask = (phase >= A) & (phase <= B)
+            phase_mask = (phase > A) & (phase < B)
             # indexes = np.where(phase_mask)
             # angle_3D[indexes] += C_lobe1
             angle_3D[phase_mask] += C_lobe1
@@ -211,52 +212,38 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             # a_cos_3D[phase_mask] *= braid_scale
             # a_sin_3D[phase_mask] *= braid_scale
             # Lobe 2
-            
             print('Lobe 2')
-            A, B = 1 / 3 * np.pi, 3 / 3 * np.pi
-            # A, B = 1 / 3 * np.pi, 2.5 / 3 * np.pi
-            # phase_mask = (phase > A) & (phase < B)
-            phase_mask = (phase > A) & (phase < B) & ~((x_new < 0) & (y_new > 0.10) & (y_new < 0.2))
-
-            # phase_mask = (phase > A) & (phase < B) & () & ()
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase < A) & (phase >= -np.pi * 0.9)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            phase_mask = ((x_new < 0) & (y_new > 0.10) & (y_new < 0.2))
-
-            # phase_mask = (phase > A) & (phase < B) & () & ()
-            # angle_3D[phase_mask] += C_lobe2
-            x_new[phase_mask] += 17
             # z_new[phase_mask] += z_shift2
             # Lobe 3
-            
-            # print('Lobe 3')
-            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            # phase_mask = (phase > B) & (phase < np.pi  * 1)
-            # angle_3D[phase_mask] += C_lobe3
-            # x_new[phase_mask] += x_shift3
-            # y_new[phase_mask] += y_shift3
-            # z_new[phase_mask] += z_shift3
-            
+            print('Lobe 3')
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase > B) & (phase < np.pi * 0.9)
+            angle_3D[phase_mask] += C_lobe3
+            x_new[phase_mask] += x_shift3
+            y_new[phase_mask] += y_shift3
+            z_new[phase_mask] += z_shift3
             # plot_field(x_new)
             # plt.show()
         elif braids_modification == 1:
             # Lobe 2
-
-            print('Lobe 2')
-            A, B = -3 / 3 * np.pi, -1 / 3 * np.pi
-            # A, B = -2 / 3 * np.pi, -1 / 3 * np.pi
-            phase_mask = (phase > A) & (phase <= B)
+            print('Braid 2\nLobe 2')
+            # A, B = 0, 0
+            phase_mask = (phase >= 0) & (phase <= np.pi * 1)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            
             # Lobe 3
             print('Lobe 3')
-            A, B = -1 / 3 * np.pi, 3 / 3 * np.pi
-            phase_mask = (phase > A) & (phase < B)
+            # A, B = 0, 0
+            # phase_mask = (phase <= A)
+            phase_mask = (phase < 0) & (phase > -np.pi * 1)
             angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
@@ -264,16 +251,6 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             # plot_field(x_new)
             # plt.show()
             # exit()
-            # plot_field(x_new[:, y_ind - 2, :])
-            # plt.show()
-            # plot_field(x_new[:, y_ind - 1, :])
-            # plt.show()
-            # plot_field(x_new[:, y_ind, :])
-            # plt.show()
-            # plot_field(x_new[:, y_ind + 1, :])
-            # plt.show()
-            # plot_field(x_new[:, y_ind + 2, :])
-            # plt.show()
    
     # else:
     #     x_new = x
@@ -584,11 +561,11 @@ if real_field:
 if plot_real_field and real_field:
     plot_field(field_new_3D, intensity=False)
     plt.show()
-    plot_field(field_new_3D[:, y_ind, :])
-    plt.show()
+    # plot_field(field_new_3D[:, y_ind, :])
+    # plt.show()
 
 if plot_real_lines and real_field:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
     plt.show()
 ###################################################################
