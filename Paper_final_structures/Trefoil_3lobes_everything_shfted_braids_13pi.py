@@ -155,7 +155,7 @@ z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-0.9, 0.9)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 11
+res_x_3D, res_y_3D, res_z_3D = 210, 210, 11
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -216,18 +216,31 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             A, B = 1 / 3 * np.pi, 3 / 3 * np.pi
             # A, B = 1 / 3 * np.pi, 2.5 / 3 * np.pi
             # phase_mask = (phase > A) & (phase < B)
-            phase_mask = (phase > A) & (phase < B) & ~((x_new < 0) & (y_new > 0.10) & (y_new < 0.2))
+            phase_mask = (phase > A) & (phase <= B) # & ~((x_new < 0) & (y_new > 0.10) & (y_new < 0.2))
 
             # phase_mask = (phase > A) & (phase < B) & () & ()
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            phase_mask = ((x_new < 0) & (y_new > 0.10) & (y_new < 0.2))
+            y_new[:res_x_3D//2,res_y_3D//2 + 0,:] -= y_shift2  #  :res_y_3D//2 + 1
+            y_new[:res_x_3D//2,res_y_3D//2 + 1,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # y_new[:res_x_3D//2,res_y_3D//2 - 0,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # y_new[:res_x_3D//2,res_y_3D//2 - 1,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # y_new[:res_x_3D//2,res_y_3D//2 + 2,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # y_new[:res_x_3D//2,res_y_3D//2 + 3,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # y_new[:res_x_3D//2,res_y_3D//2 + 4,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # x_new[:res_x_3D//2,res_y_3D//2 + 0,:] -= x_shift2  #  :res_y_3D//2 + 1
+            # x_new[:res_x_3D//2,res_y_3D//2 + 1,:] += x_shift2  #  :res_y_3D//2 + 1
+            # print(y_new[res_x_3D//2,res_y_3D//2 - 1,0])
+            # print(y_new[res_x_3D//2,res_y_3D//2 + 0,0])
+            # print(y_new[res_x_3D//2,res_y_3D//2 + 1,0])
+            # print(y_new[res_x_3D//2,res_y_3D//2 + 2,0])
+            # phase_mask = ((x_new < 0) & (y_new > 0.10) & (y_new < 0.2))
 
             # phase_mask = (phase > A) & (phase < B) & () & ()
             # angle_3D[phase_mask] += C_lobe2
-            x_new[phase_mask] += 17
+            # x_new[phase_mask] += 17
             # z_new[phase_mask] += z_shift2
             # Lobe 3
             
