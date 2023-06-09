@@ -6,6 +6,7 @@ import numpy as np
 from scipy.special import assoc_laguerre
 import my_functions.functions_general as fg
 import math
+import matplotlib.pyplot as plt
 import scipy.io
 
 
@@ -148,25 +149,28 @@ C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
 shift = 0.3  # 0.2
 BETTA = np.pi / 3
 ALPHA = BETTA * (2 / 3) / 1
-l1, l2, l3 = 0, 1, 0
+l1, l2, l3 = 1, 1, 1
 # x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 # y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
 z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-0.9, 0.9)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
-res_x_3D, res_y_3D, res_z_3D = 210, 210, 11
-x_shift1 = +shift * np.cos(ALPHA) * l1
-y_shift1 = -shift * np.sin(ALPHA) * l1
+res_x_3D, res_y_3D, res_z_3D = 211, 211, 11
+angle_shift = -np.pi / 6
+angle_shift = 0
+# angle_shift = -ALPHA
+x_shift1 = +shift * np.cos(ALPHA + angle_shift) * l1
+y_shift1 = -shift * np.sin(ALPHA + angle_shift) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
 # y_shift2 = +shift * np.cos(np.pi / 6 - ALPHA) * l2
 # x_shift3 = -shift * np.sin(np.pi / 6 + ALPHA) * l3
 # y_shift3 = -shift * np.cos(np.pi / 6 + ALPHA) * l3
 
-x_shift2 = -shift * np.sin(np.pi / 6 + ALPHA) * l2
-y_shift2 = -shift * np.cos(np.pi / 6 + ALPHA) * l2
-x_shift3 = -shift * np.sin(np.pi / 6 - ALPHA) * l3
-y_shift3 = +shift * np.cos(np.pi / 6 - ALPHA) * l3
+x_shift2 = -shift * np.sin(np.pi / 6 + ALPHA + angle_shift) * l2
+y_shift2 = -shift * np.cos(np.pi / 6 + ALPHA + angle_shift) * l2
+x_shift3 = -shift * np.sin(-np.pi / 6 + ALPHA - angle_shift) * l3
+y_shift3 = +shift * np.cos(-np.pi / 6 + ALPHA - angle_shift) * l3
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
           braids_modification=None):
@@ -223,8 +227,11 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            y_new[:res_x_3D//2,res_y_3D//2 + 0,:] -= y_shift2  #  :res_y_3D//2 + 1
-            y_new[:res_x_3D//2,res_y_3D//2 + 1,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # angle_3D[phase_mask] += C_lobe2
+            angle_3D[:res_x_3D//2,res_y_3D//2 + 0,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 + 1,:] += np.pi
+            # y_new[:res_x_3D//2,res_y_3D//2 + 0,:] -= y_shift2  #  :res_y_3D//2 + 1
+            # y_new[:res_x_3D//2,res_y_3D//2 + 1,:] -= y_shift2  #  :res_y_3D//2 + 1
             # y_new[:res_x_3D//2,res_y_3D//2 - 0,:] -= y_shift2  #  :res_y_3D//2 + 1
             # y_new[:res_x_3D//2,res_y_3D//2 - 1,:] -= y_shift2  #  :res_y_3D//2 + 1
             # y_new[:res_x_3D//2,res_y_3D//2 + 2,:] -= y_shift2  #  :res_y_3D//2 + 1
@@ -296,9 +303,14 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
     #     a_cos_3D = a_cos
     #     a_sin_3D = a_sin
     if braids_modification in [braids_modification]:  # [braids_modification]:  # [0, 1] for turning off the braids
-        return u(x_new, y_new, z_new) * np.exp(1j * theta) - (
+        field = u(x_new, y_new, z_new) * np.exp(1j * theta) - (
                 cos_v(x_new, y_new, z_new, pow_cos) / a_cos_3D + 1j
                 * sin_v(x_new, y_new, z_new, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
+        # plt.plot(np.abs(field[:res_x_3D // 2, res_y_3D // 2 + -1, res_z_3D // 2]))
+        # plt.plot(np.abs(field[:res_x_3D // 2, res_y_3D // 2 + 0, res_z_3D // 2]))
+        # plt.plot(np.abs(field[:res_x_3D // 2, res_y_3D // 2 + 1, res_z_3D // 2]))
+        # plt.show()
+        return field
     else:
         return 1
     # cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
@@ -453,7 +465,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 
 
 """beam parameters"""
-w = 1.3
+w = 1.15
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
@@ -504,7 +516,7 @@ k_0_spec = 1.6
 # pl.plot_3D_density(np.abs(field_norm))
 # plt.show()
 if plot_milnor_field:
-    plot_field(field_norm)
+    plot_field(field_norm / np.abs(field_norm).max())
     plt.show()
     # plot_field(field_norm[:, :, res_z_3D//2 - 10])
     # plt.show()
@@ -601,7 +613,7 @@ if plot_real_field and real_field:
     plt.show()
 
 if plot_real_lines and real_field:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=False, returnDict=True)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
     plt.show()
 ###################################################################

@@ -137,7 +137,7 @@ def v(x, y, z):
 plot_milnor_field = 1
 plot_milnor_lines = 0
 plot_braids = 0
-real_field = 1
+real_field = 0
 plot_real_field = 1
 plot_real_lines = 1
 
@@ -145,19 +145,24 @@ plot_real_lines = 1
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
 x_scale1 = 1
-y_scale1 = 1
-C_lobe1, C_lobe2, C_lobe3 = np.pi * 1 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
-shift = 0.3  # 0.2
+y_scale1 = 1 #/ 1.5
+x_scale2 = 1 #/ 1.5 #* np.sin(np.pi/6) #/(1 + .5 * np.cos(np.pi/6))
+y_scale2 = 1 #/ 1.5 #* np.cos(np.pi/6) #/(1 + .5 * np.sin(np.pi/6))
+x_scale3 = 1
+y_scale3 = 1
+C_lobe1, C_lobe2, C_lobe3 = np.pi * 0 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
+shift = 0.325  # 0.2
 BETTA = 0 / 3
 ALPHA = BETTA * (2 / 3) / 1
-l1, l2, l3 = 0, 0, -0.5
+l1, l2, l3 = 1, 1, 1
 # x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 # y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
-z_shift1, z_shift2, z_shift3 = -0.3, 0.2, 0.3
+z_shift1, z_shift2, z_shift3 = 0, 0, 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-4.5, 4.5), (-4.5, 4.5), (-1, 1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
+res_x_3D, res_y_3D, res_z_3D = 111, 111, 91
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -207,43 +212,76 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift1
             y_new[phase_mask] += y_shift1
             z_new[phase_mask] += z_shift1
+
+            x_new[phase_mask] *= x_scale1
+            y_new[phase_mask] *= y_scale1
             # a_cos_3D = np.ones(np.shape(z)) * a_cos
             # a_sin_3D = np.ones(np.shape(z)) * a_sin
             # a_cos_3D[phase_mask] *= braid_scale
             # a_sin_3D[phase_mask] *= braid_scale
             # Lobe 2
             print('Lobe 2')
-            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            phase_mask = (phase < A) & (phase >= -np.pi * 0.9)
+            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase < A) & (phase >= -np.pi * 1)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
+            ar = np.pi / 6
+            x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
+            y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
+            x_new[phase_mask] *= (
+                x_p * np.cos(ar) + y_p * np.sin(ar)
+            )
+            x_new[phase_mask] *= (
+                    -x_p * np.sin(ar) + y_p * np.cos(ar)
+            )
+            # angle_3D[:res_x_3D//2,res_y_3D//2 + 0,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 - 1,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 - 2,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 - 3,:] += np.pi
+            # angle_3D[:res_x_3D//2,res_y_3D//2 - 3,:] += np.pi
+            # angle_3D[:res_x_3D//2,res_y_3D//2 - 4,:] += np.pi
             # z_new[phase_mask] += z_shift2
             # Lobe 3
             print('Lobe 3')
-            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            phase_mask = (phase > B) & (phase < np.pi * 0.9)
+            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase > B) & (phase <= np.pi * 1)
             angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
+            angle_3D[:res_x_3D//2,res_y_3D//2 + 0,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 + 1,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 + 2,:] += np.pi
+            angle_3D[:res_x_3D//2,res_y_3D//2 + 3,:] += np.pi
+            # angle_3D[:res_x_3D//2,res_y_3D//2 + 3,:] += np.pi
+            # angle_3D[:res_x_3D//2,res_y_3D//2 + 4,:] += np.pi
             # plot_field(x_new)
             # plt.show()
         elif braids_modification == 1:
             # Lobe 2
             print('Braid 2\nLobe 2')
             # A, B = 0, 0
-            phase_mask = (phase >= 0) & (phase <= np.pi * 1)
+            phase_mask = (phase > 0) & (phase <= np.pi * 1)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
+            ar = np.pi / 6
+            x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
+            y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
+            x_new[phase_mask] *= (
+                x_p * np.cos(ar) + y_p * np.sin(ar)
+            )
+            x_new[phase_mask] *= (
+                    -x_p * np.sin(ar) + y_p * np.cos(ar)
+            )
             # Lobe 3
             print('Lobe 3')
             # A, B = 0, 0
             # phase_mask = (phase <= A)
-            phase_mask = (phase < 0) & (phase > -np.pi * 1)
+            phase_mask = (phase < 0) & (phase >= -np.pi * 1)
             angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
@@ -417,7 +455,7 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 
 
 """beam parameters"""
-w = 1.3
+w = 1.03
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
@@ -559,7 +597,7 @@ if real_field:
     # weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
 if plot_real_field and real_field:
-    plot_field(field_new_3D, intensity=False)
+    plot_field(field_new_3D / np.abs(field_new_3D).max(), intensity=False)
     plt.show()
     # plot_field(field_new_3D[:, y_ind, :])
     # plt.show()
