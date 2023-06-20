@@ -3,7 +3,8 @@ import my_functions.beams_and_pulses as bp
 import my_functions.plotings as pl
 
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-0.9, 0.9)
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 11
+x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-0.7, 0.7)
+res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -107,17 +108,18 @@ if 0:
 
 # trefoil 3D
 if 1:
-    C00 = 1.51
-    C01 = -5.06
-    C02 = 7.23
-    C03 = -2.04
-    C30 = -3.97
-    # # normal
-    # C00 = 1.71
-    # C01 = -5.66
-    # C02 = 6.38
-    # C03 = -2.3
-    # C30 = -4.36 * np.exp(1j * (np.pi / 2 + np.pi / 6))
+    # # Denis
+    # C00 = 1.51
+    # C01 = -5.06
+    # C02 = 7.23
+    # C03 = -2.04
+    # C30 = -3.97
+    # normal
+    C00 = 1.71
+    C01 = -5.66
+    C02 = 6.38
+    C03 = -2.3
+    C30 = -4.36  # * np.exp(1j * (np.pi / 2 + np.pi / 6))
     # # our
     # C00 = 1.55
     # C01 = -5.11
@@ -135,11 +137,15 @@ if 1:
     field = field / field.max()
     plot_field(field, axes=True)
     plt.show()
-    exit()
     # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
     #                          opacityscale='max', colorscale='Jet')
-    _, dots_init = sing.get_singularities(np.angle(field), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=10)  #, fig=Fig)
+    _, dots_init = sing.get_singularities(np.angle(field), axesAll=False, returnDict=True)
+    # dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=10)  #, fig=Fig)
+    file_name = (
+            f'trefoil_math_w={str(width).replace(".", "d")}_x={str(x_3D.max()).replace(".", "d")}' +
+            f'_resXY={res_x_3D}_resZ={res_z_3D}'
+    )
+    np.save(file_name, np.array(dots_init))
     plt.show()
 
 # trefoil polynomials
