@@ -314,9 +314,10 @@ def salesman(dots):
     fitness_dists = mlrose.TravellingSales(distances=dist_matrix_ml)
     problem_fit = mlrose.TSPOpt(length=len(dots), fitness_fn=fitness_dists, maximize=False)
 
-    permutation, _ = mlrose.genetic_alg(problem_fit, random_state=2)
-    print(permutation)
-    return dots[permutation]
+    # permutation, _ = mlrose.genetic_alg(problem_fit, random_state=2)
+    print(mlrose.genetic_alg(problem_fit, random_state=2))
+    # print(permutation)
+    # return dots[permutation]
 
 
 # XYZ = curve_3D(x, y, z, resolution=40)
