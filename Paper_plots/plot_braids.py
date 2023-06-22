@@ -12,6 +12,7 @@ import scipy.io
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline
+from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from scipy.interpolate import UnivariateSpline
 from scipy.interpolate import splprep, splev
@@ -314,10 +315,28 @@ def salesman(dots):
     fitness_dists = mlrose.TravellingSales(distances=dist_matrix_ml)
     problem_fit = mlrose.TSPOpt(length=len(dots), fitness_fn=fitness_dists, maximize=False)
 
-    # permutation, _ = mlrose.genetic_alg(problem_fit, random_state=2)
-    print(mlrose.genetic_alg(problem_fit, random_state=2))
-    # print(permutation)
-    # return dots[permutation]
+    permutation, _, _ = mlrose.genetic_alg(problem_fit, random_state=2)
+    # print(mlrose.genetic_alg(problem_fit, random_state=2))
+    # exit()
+    print(permutation)
+    return dots[permutation]
+def find_path(coords):
+    nbrs = NearestNeighbors(n_neighbors=len(coords), algorithm='ball_tree').fit(coords)
+    distances, indices = nbrs.kneighbors(coords)
+
+    current_index = 0
+    path = [current_index]
+
+    while len(path) < len(coords):
+        remaining_indices = np.delete(indices[current_index], path)
+        current_index = remaining_indices[0]
+        path.append(current_index)
+    print(path)
+    return path
+
+
+
+
 
 
 # XYZ = curve_3D(x, y, z, resolution=40)
@@ -361,11 +380,16 @@ trefoil = np.load('trefoil_math_w=0d95_x=5d5_resXY=111_resZ=111.npy')
 # sorted_indices = np.argsort(hopf_braid1[:, -1])[::-1]
 # hopf_braid1_sorted = hopf_braid1[sorted_indices]
 res = 111
-trefoil = salesman(trefoil)
 x = (trefoil[:, 0] - res // 2) / res * 10
 y = (trefoil[:, 1] - res // 2) / res * 10
 z = (trefoil[:, 2] - res // 2) / res * 10
+print(trefoil[:40])
 dots = np.stack([x, y, z], axis=1)
+# Find the path
+print(dots)
+dots = dots[find_path(trefoil)]
+print(dots)
+# dots = salesman(dots) * np.array([5, 5, 1])
 
 # trefoil and torus
 if 1:
