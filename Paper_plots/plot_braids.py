@@ -320,20 +320,36 @@ def salesman(dots):
     # exit()
     print(permutation)
     return dots[permutation]
-def find_path(coords):
-    nbrs = NearestNeighbors(n_neighbors=len(coords), algorithm='ball_tree').fit(coords)
-    distances, indices = nbrs.kneighbors(coords)
+def find_path(dots):
+    nbrs = NearestNeighbors(n_neighbors=len(dots), algorithm='ball_tree').fit(dots)
+    print(dots)
+    distances, indices = nbrs.kneighbors(dots)
 
+    visited = set()
     current_index = 0
     path = [current_index]
+    visited.add(current_index)
 
-    while len(path) < len(coords):
-        remaining_indices = np.delete(indices[current_index], path)
-        current_index = remaining_indices[0]
+    while len(path) < len(dots):
+        for idx in indices[current_index]:
+            if idx not in visited:
+                current_index = idx
+                break
         path.append(current_index)
-    print(path)
+        visited.add(current_index)
+
     return path
 
+
+def find_path2(coords):
+    current_index = 0
+    path = [current_index]
+    while len(path) < len(coords):
+        remaining_indices = np.delete(np.arange(len(coords)), path)
+        distances = np.linalg.norm(coords[remaining_indices] - coords[current_index], axis=1)
+        current_index = remaining_indices[np.argmin(distances)]
+        path.append(current_index)
+    return path
 
 
 
@@ -360,7 +376,7 @@ if 0:
     plotDots(dots, boundary_3D, color='black', show=True, size=7)
 
 # braids
-if 0:
+if 1:
     fig = plot_cylinder(
         radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
     )
@@ -375,81 +391,3 @@ if 0:
     pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.5, 1.5, 1.5 * 1.5])
     fig.show()
     exit()
-
-trefoil = np.load('trefoil_math_w=0d95_x=5d5_resXY=111_resZ=111.npy')
-# sorted_indices = np.argsort(hopf_braid1[:, -1])[::-1]
-# hopf_braid1_sorted = hopf_braid1[sorted_indices]
-res = 111
-x = (trefoil[:, 0] - res // 2) / res * 10
-y = (trefoil[:, 1] - res // 2) / res * 10
-z = (trefoil[:, 2] - res // 2) / res * 10
-print(trefoil[:40])
-dots = np.stack([x, y, z], axis=1)
-# Find the path
-print(dots)
-dots = dots[find_path(trefoil)]
-print(dots)
-# dots = salesman(dots) * np.array([5, 5, 1])
-
-# trefoil and torus
-if 1:
-    # fig = plot_cylinder(
-    # 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
-    # )
-    # fig = plot_torus(
-    # 	r_center=0.7, r_tube=0.4, fig=None, show=False, segments=100, rings=100, dots_bound=boundary_3D
-    # )
-    color = ([0, '#660000'], [1, '#ff0000'])
-    fig = plot_line_colored(dots, dots_bound=boundary_3D, show=False, color=color, width=25, fig=None, save=None)
-    # color = ([0, '#660000'], [1, '#ff0000'])
-    pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.5, 1.5, 1.5 * 1.5])
-    fig.show()
-    exit()
-# plotly
-if 0:
-    fig = go.Figure(data=[go.Scatter3d(
-        x=x,
-        y=y,
-        z=z,
-        mode='lines',
-    )])
-    fig.show()
-
-# plotly figure_factory
-if 0:
-    import plotly.figure_factory as ff
-    
-    fig = ff.create_3d_line(x, y, z)
-    
-    # Show the figure
-    fig.show()
-
-# canvas
-if 0:
-    canvas = scene.SceneCanvas(keys='interactive', show=True)
-    view = canvas.central_widget.add_view()
-    line = scene.Line(np.column_stack((x, y, z)), color='red', method='agg', width=5, parent=view.scene)
-    axis = scene.visuals.XYZAxis(parent=view.scene)
-    view.camera = 'turntable'
-    view.camera.set_range()
-    app.run()
-
-# canvas 2
-if 0:
-    canvas = scene.SceneCanvas(keys='interactive', show=True)  # , bgcolor='white')
-    view = canvas.central_widget.add_view()
-    points = np.column_stack((x, y, z))
-    tube = scene.visuals.Tube(points, color='red', shading='smooth',
-                              parent=view.scene)
-    
-    # Auto-scale to see the whole line
-    view.camera = 'turntable'
-    view.camera.set_range()
-    
-    app.run()
-
-# fig = go.Figure(data=[go.Scatter3d(x=hopf_braid1[:, 0], y=hopf_braid1[:, 1], z=hopf_braid1[:, 2],
-#                                    mode='markers')])
-# fig.show()
-# mlab.plot3d(x, y, z, tube_radius=0.1)
-# mlab.show()

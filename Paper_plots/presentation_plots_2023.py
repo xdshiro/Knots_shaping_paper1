@@ -4,7 +4,7 @@ import my_functions.plotings as pl
 
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-0.9, 0.9)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-0.7, 0.7)
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
+res_x_3D, res_y_3D, res_z_3D = 511, 511, 511
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
@@ -147,6 +147,20 @@ if 1:
     )
     np.save(file_name, np.array(dots_init))
     plt.show()
+
+# trefoil in Milnor space
+if 0:
+    def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1):
+        def cos_v(x, y, z, power=1):
+            return (v(x, y, z) ** power + np.conj(v(x, y, z)) ** power) / 2
+        
+        def sin_v(x, y, z, power=1):
+            return (v(x, y, z) ** power - np.conj(v(x, y, z)) ** power) / 2j
+
+        return u(x, y, z) * np.exp(1j * theta) - (
+                cos_v(x, y, z, pow_cos) / a_cos + 1j
+                * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle)
+        # cos_v(x, y, z, pow_cos) / a_cos + 1j * sin_v(x, y, z, pow_sin) / a_sin) * np.exp(1j * angle_3D)
 
 # trefoil polynomials
 if 0:
