@@ -201,7 +201,7 @@ def plot_scatter_3D(X, Y, Z, ax=None, size=plt.rcParams['lines.markersize'] ** 2
 
 
 def box_set_go(fig, xyzMinMax=(-1, 1, -1, 1, -1, 1), width=3, perBox=0, mesh=None, autoDots=None,
-               return_boundaries=False, aspects=(2, 2, 2)):
+               return_boundaries=False, aspects=(2, 2, 2), lines=True):
     """
     Function remove the standard layout and put the plot into the box of black lines
     :param fig: which fig should be updated
@@ -243,21 +243,21 @@ def box_set_go(fig, xyzMinMax=(-1, 1, -1, 1, -1, 1), width=3, perBox=0, mesh=Non
         xMin, xMax = xMin - (xMax - xMin) * perBox, xMax + (xMax - xMin) * perBox
         yMin, yMax = yMin - (yMax - yMin) * perBox, yMax + (yMax - yMin) * perBox
         zMin, zMax = zMin - (zMax - zMin) * perBox, zMax + (zMax - zMin) * perBox
-
-    lineX = np.array([[xMin, yMin, zMin], [xMax, yMin, zMin], [xMax, yMax, zMin],
-                      [xMin, yMax, zMin], [xMin, yMin, zMin]])
-    plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
-    lineX = np.array([[xMin, yMin, zMax], [xMax, yMin, zMax], [xMax, yMax, zMax],
-                      [xMin, yMax, zMax], [xMin, yMin, zMax]])
-    plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
-    lineX = np.array([[xMin, yMin, zMin], [xMin, yMin, zMax]])
-    plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
-    lineX = np.array([[xMax, yMin, zMin], [xMax, yMin, zMax]])
-    plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
-    lineX = np.array([[xMax, yMax, zMin], [xMax, yMax, zMax]])
-    plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
-    lineX = np.array([[xMin, yMax, zMin], [xMin, yMax, zMax]])
-    plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
+    if lines:
+        lineX = np.array([[xMin, yMin, zMin], [xMax, yMin, zMin], [xMax, yMax, zMin],
+                          [xMin, yMax, zMin], [xMin, yMin, zMin]])
+        plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
+        lineX = np.array([[xMin, yMin, zMax], [xMax, yMin, zMax], [xMax, yMax, zMax],
+                          [xMin, yMax, zMax], [xMin, yMin, zMax]])
+        plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
+        lineX = np.array([[xMin, yMin, zMin], [xMin, yMin, zMax]])
+        plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
+        lineX = np.array([[xMax, yMin, zMin], [xMax, yMin, zMax]])
+        plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
+        lineX = np.array([[xMax, yMax, zMin], [xMax, yMax, zMax]])
+        plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
+        lineX = np.array([[xMin, yMax, zMin], [xMin, yMax, zMax]])
+        plot_3D_dots_go(lineX, fig=fig, mode='lines', line={'width': width, 'color': 'black'})
     per = 0.01
     boundaries = [xMin - (xMax - xMin) * per, xMax + (xMax - xMin) * per,
                   yMin - (yMax - yMin) * per, yMax + (yMax - yMin) * per,
