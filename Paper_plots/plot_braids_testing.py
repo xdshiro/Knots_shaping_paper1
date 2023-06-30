@@ -375,7 +375,24 @@ dots2 = np.stack([x2, y2, z2], axis=1)
 if 0:
     plotDots(dots, boundary_3D, color='black', show=True, size=7)
 
-# braids
+# braids hopf normal
+if 0:
+    fig = plot_cylinder(
+        radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
+    )
+    # fig = plot_torus(
+    # 	r_center=0.7, r_tube=0.4, fig=None, show=False, segments=100, rings=100, dots_bound=boundary_3D
+    # )
+    color = ([0, '#660000'], [1, '#ff0000'])
+    plot_line_colored(dots, dots_bound=boundary_3D, show=False, color=color, width=25, fig=fig, save=None)
+    color2 = ([0, '#007dff'], [1, '#000099'])
+    # color = ([0, '#660000'], [1, '#ff0000'])
+    plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color2, width=25, fig=fig, save=None)
+    pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.5, 1.5, 1.5 * 1.5])
+    fig.show()
+    exit()
+
+# braids hopf normal
 if 1:
     fig = plot_cylinder(
         radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D

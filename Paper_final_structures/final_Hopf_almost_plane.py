@@ -139,6 +139,12 @@ plot_milnor_lines = 0
 plot_braids = 0
 plot_real_field = 1
 plot_real_lines = 1
+# ANGLE
+alpha_size = 10
+rotation_angle = 45 - np.degrees(np.arcsin(1/alpha_size/np.sqrt(2)))
+rotation_angle = 90 - (45 - np.degrees(np.arcsin(1/alpha_size/np.sqrt(2))))
+# rotation_angle = 41
+print(rotation_angle)
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
@@ -168,10 +174,10 @@ z_shift1 = 0
 z_shift2 = 0
 # z_shift2 = - 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-6.0, 6.0), (-6.0, 6.0), (-1.5, 1.5)
-x_lim_3D, y_lim_3D, z_lim_3D = (-8.0, 8.0), (-8.0, 8.0), (-0.1, 0.1)
-# x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
-res_x_3D, res_y_3D, res_z_3D = 120, 120, 61
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0),\
+	(1.1 * -1.2 / alpha_size, 1.1 * 1.2 / alpha_size)
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -322,8 +328,8 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 	# mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(45), np.radians(30), np.radians(30))
-	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180-44), np.radians(00), np.radians(0))
-	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180+44), np.radians(00), np.radians(0))
+	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180-rotation_angle), np.radians(00), np.radians(0))
+	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180+rotation_angle), np.radians(00), np.radians(0))
 	# mesh_3D_rotated_2 =mesh_3D
 	xyz_array = [
 		(mesh_3D_rotated_2[0], mesh_3D_rotated_2[1], mesh_3D_rotated_2[2]),
@@ -389,6 +395,7 @@ phase = np.angle(mesh_3D[0] + 1j * mesh_3D[1])
 mesh_2D_xz = np.meshgrid(x_3D, z_3D, indexing='ij')  #
 R = np.sqrt(mesh_3D[0] ** 2 + mesh_3D[1] ** 2)
 boundary_3D = [[0, 0, 0], [res_x_3D, res_y_3D, res_z_3D]]
+boundary_3D_k = [[0, 0, 0], [res_x_3D_k, res_y_3D_k, res_z_3D_k]]
 """creating the field"""
 # mesh for each brade (in "Milnor" space)
 # xyz_array = [
@@ -498,10 +505,11 @@ total = 0
 l_save = []
 p_save = []
 weight_save = []
+modes_cutoff = 0.05
 
 for l, p_array in enumerate(values):
 	for p, value in enumerate(p_array):
-		if abs(value) > 0.0000001 * abs(values).max():
+		if abs(value) > modes_cutoff * abs(values).max():
 			total += 1
 			l_save.append(l + moment0)
 			p_save.append(p)
@@ -510,7 +518,9 @@ for l, p_array in enumerate(values):
 			field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
 			                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
 weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
-scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+field_new_3D = field_new_3D / np.abs(field_new_3D).max()
+print(weights_important)
+# scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
 if plot_real_field:
 	plot_field(field_new_3D, intensity=False)
 	plt.show()
@@ -518,7 +528,17 @@ if plot_real_field:
 	plt.show()
 
 if plot_real_lines:
-	_, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
-	dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
+	x_3D_k = np.linspace(*x_lim_3D_k, res_x_3D_k)
+	y_3D_k = np.linspace(*y_lim_3D_k, res_y_3D_k)
+	z_3D_k = np.linspace(*z_lim_3D_k, res_z_3D_k)
+	mesh_3D_k = np.meshgrid(x_3D_k, y_3D_k, z_3D_k, indexing='ij')  #
+	field_new_3D_k = np.zeros((res_x_3D_k, res_y_3D_k, res_z_3D_k)).astype(np.complex128)
+	for l, p_array in enumerate(values):
+		for p, value in enumerate(p_array):
+			if abs(value) > modes_cutoff * abs(values).max():
+				field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
+				                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+	_, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
+	dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
 	plt.show()
 ###################################################################

@@ -147,68 +147,11 @@ def plot_line_colored(dots, dots_bound=None, show=True, color=(0, 'black'), widt
 	return fig
 
 
-def plot_cylinder(radius=1., height=2., center=(0, 0, 0), segments=50, fig=None,
-                  save=None, show=False, dots_bound=None, aspects=(2, 2, 2)):
-	theta = np.linspace(0, 2 * np.pi, segments)
-	x = center[0] + radius * np.cos(theta)
-	y = center[1] + radius * np.sin(theta)
-	z_bottom = np.full_like(theta, center[2] - height / 2)
-	z_top = np.full_like(theta, center[2] + height / 2)
-	
-	# The vertices are the points on the bottom and top circles of the cylinder
-	vertices = np.column_stack([np.append(x, x), np.append(y, y), np.append(z_bottom, z_top)])
-	
-	# Generate the faces of the cylinder
-	# faces = [[i, i + 1, i + segments + 1, i + segments] for i in range(segments - 1)]
-	# faces.append([segments - 1, 0, segments, 2 * segments - 1])  # last face connects back to the first
-	faces = []
-	# intensity2 = []
-	for i in range(segments - 1):
-		faces.append([i, i + 1, i + segments])
-		faces.append([i + segments, i + 1, i + segments + 1])
-	
-	# faces.append([i + segments, i + 1, i + segments + 1])
-	# faces.append([segments - 1, 0, 2 * segments - 1])
-	# intensity2.append((theta[segments - 1] + theta[0] + theta[2 * segments - 1]) / 3 / (2 * np.pi))
-	# faces.append([2 * segments - 1, 0, segments])
-	# colorscale = [[0, '#cccccc'], [0.5, '#666666'], [1, '#cccccc']]
-	colorscale = [[0, '#c3dbd7'], [0.5, '#666666'], [1, '#c3dbd7']]
-	# colorscale = [[0, 'blue'], [0.5, 'red'], [1, 'blue']]
-	intensity = np.append(theta / (2 * np.pi), theta / (2 * np.pi))
-	print(x)
-	print(intensity)
-	# Create a Mesh3d trace for the cylinder
-	trace_cylinder = go.Mesh3d(
-		x=vertices[:, 0],
-		y=vertices[:, 1],
-		z=vertices[:, 2],
-		i=[face[0] for face in faces],
-		j=[face[1] for face in faces],
-		k=[face[2] for face in faces],
-		intensity=intensity,  # use theta for color
-		# intensity=theta / (2 * np.pi),  # use theta for color
-		colorscale=colorscale,
-		opacity=.5,  # semi-transparent
-		name='cylinder'
-	)
-	if fig is None:
-		fig = go.Figure()
-	
-	fig.add_trace(trace_cylinder)
-	pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01, aspects=aspects)
-	if save is not None:
-		fig.write_html(save)
-	if show:
-		fig.show()
-	
-	return fig
-
-
 def plot_torus(r_center=3, r_tube=1., segments=100, rings=100, fig=None,
                save=None, show=False):
-	theta = np.linspace(0, 2 * np.pi, segments)  # coordinates around the tube
-	phi = np.linspace(0, 2 * np.pi, rings)  # coordinates around the torus
-	theta, phi = np.meshgrid(theta, phi)
+	theta_plane = np.linspace(0, 2 * np.pi, segments)  # coordinates around the tube
+	phi_plane = np.linspace(0, 2 * np.pi, rings)  # coordinates around the torus
+	theta, phi = np.meshgrid(theta_plane, phi_plane)
 	x = (r_center + r_tube * np.cos(theta)) * np.cos(phi)
 	y = (r_center + r_tube * np.cos(theta)) * np.sin(phi)
 	z = r_tube * np.sin(theta)
@@ -235,7 +178,19 @@ def plot_torus(r_center=3, r_tube=1., segments=100, rings=100, fig=None,
 	# colorscale = [[0, '#cccccc'], [0.5, '#666666'], [1, '#cccccc']]
 	# colorscale = [[0, '#c3dbd7'], [0.5, '#666666'], [1, '#c3dbd7']]
 	colorscale = [[0, '#95edec'], [0.5, '#666666'], [1, '#95edec']]
+	# colorscale = [[0, 'red'], [1, 'blue']]
 	# Create a Mesh3d trace for the cylinder
+	intensity = (phi.flatten() / (2 * np.pi))
+	intensity = np.tile(theta_plane / (2 * np.pi), rings)
+
+	# print(theta_plane)
+	# print(intensity)
+	# print(len(intensity))
+	# exit(0)
+	# print(intensity)
+	# print(np.shape(intensity))
+	# print(np.shape(vertices))
+	# exit(0)
 	trace_torus = go.Mesh3d(
 		x=vertices[:, 0],
 		y=vertices[:, 1],
@@ -243,9 +198,9 @@ def plot_torus(r_center=3, r_tube=1., segments=100, rings=100, fig=None,
 		i=[face[0] for face in faces],
 		j=[face[1] for face in faces],
 		k=[face[2] for face in faces],
-		intensity=(phi.flatten() / (2 * np.pi)),  # use the face index for color
+		intensity=intensity,  # use the face index for color
 		colorscale=colorscale,
-		opacity=0.4,  # semi-transparent
+		opacity=0.3,  # semi-transparent
 		name='torus'
 	)
 	# intensity=np.append(theta / (2 * np.pi), theta / (2 * np.pi)),
@@ -266,13 +221,16 @@ def plot_torus(r_center=3, r_tube=1., segments=100, rings=100, fig=None,
 def plot_ring(r_center=3, r_tube=1., segments=100, fig=None,
               save=None, show=False):
 	theta = np.linspace(0, 2. * np.pi, segments)
-	x = r_tube * np.cos(theta)
-	y = r_tube * np.sin(theta)
-	z = np.zeros_like(theta)  # Keep the circle in the x-y plane
+	x = r_center + r_tube * np.cos(theta)
+	y = np.zeros_like(theta)  # Keep the circle in the x-y plane
+	z = r_tube * np.sin(theta)
+	# dots3new = rotate_meshgrid(x, y, z,
+	#                            np.radians(0), np.radians(0), np.radians(-60))
+	# x, y, z = dots3new
 	vertices = np.column_stack([x, y, z])
 	
 	# Add the center of the circle as an additional vertex
-	vertices = np.vstack([vertices, [0, 0, 0]])
+	vertices = np.vstack([vertices, [x[len(x) // 2], y[len(y) // 2], 0]])
 	
 	# Define the triangular faces of the circle
 	faces = [[i, (i + 1) % segments, segments] for i in range(segments)]
@@ -285,8 +243,8 @@ def plot_ring(r_center=3, r_tube=1., segments=100, fig=None,
 		j=[face[1] for face in faces],
 		k=[face[2] for face in faces],
 		intensity=np.ones_like(vertices[:, 0]),
-		colorscale=[[0, 'red'], [0.5, 'red'], [1, 'red']],
-		opacity=0.5,
+		colorscale=[[0, '#666666'], [0.5, 'purple'], [1, 'blue']],
+		opacity=0.15,
 	)
 	if fig is None:
 		fig = go.Figure()
@@ -397,6 +355,15 @@ dots3 = curve_3D(dots3[:, 0], dots3[:, 1], dots3[:, 2], resolution=200, smoothin
 
 # trefoil and torus
 if 1:
+	dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
+	                           np.radians(0), np.radians(0), np.radians(60))
+	dots1 = np.array(dots1).T
+	dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
+	                           np.radians(0), np.radians(0), np.radians(60))
+	dots2 = np.array(dots2).T
+	dots3 = rotate_meshgrid(dots3[:, 0], dots3[:, 1], dots3[:, 2],
+	                           np.radians(0), np.radians(0), np.radians(60))
+	dots3 = np.array(dots3).T
 	# fig = plot_cylinder(
 	# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
 	# )
@@ -405,15 +372,13 @@ if 1:
 	               np.array([res // 2, res // 2, res // 2]) * scale]
 	width = 35
 	spheres = True
-	# fig = plot_torus(
-	# 	r_center=int(res // 4 * 0.8975), r_tube=(res // 10) * 1.36, fig=None, show=False, segments=200, rings=600,
-	# )
-	fig = plot_ring(
-		r_center=int(res // 4 * 0.8975), r_tube=(res // 10) * 1.36, fig=None, show=False, segments=200,
+	fig = plot_torus(
+		r_center=int(res // 4 * 0.9), r_tube=(res // 10) * 1.36, fig=None, show=False, segments=30, rings=90,
+	)
+	plot_ring(
+		r_center=int(res // 4 * 0.9), r_tube=(res // 10) * 1.36, fig=fig, show=False, segments=30,
 	)
 	pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	fig.show()
-	exit(0)
 	color = ([0, '#660000'], [1, '#ff0000'])
 	plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
 	                  fig=fig, save=None, spheres=spheres)
@@ -426,6 +391,7 @@ if 1:
 	plot_line_colored(dots3, dots_bound=boundary_3D, show=False, color=color, width=width,
 	                  fig=fig, save=None, spheres=spheres)
 	pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+	# fig.write_html('test_torus_braids.html')
 	fig.show()
 	exit()
 
@@ -441,7 +407,7 @@ if 1:
 	width = 35
 	spheres = True
 	fig = plot_torus(
-		r_center=int(res // 4 * 0.8975), r_tube=(res // 10) * 1.36, fig=None, show=False, segments=200, rings=600,
+		r_center=int(res // 4 * 0.9), r_tube=(res // 10) * 1.36, fig=None, show=False, segments=200, rings=600,
 		dots_bound=boundary_3D
 	)
 	color = ([0, '#660000'], [1, '#ff0000'])
