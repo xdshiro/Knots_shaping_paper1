@@ -143,13 +143,14 @@ plot_real_lines = 1
 alpha_size = 10
 rotation_angle = 45 - np.degrees(np.arcsin(1/alpha_size/np.sqrt(2)))
 rotation_angle = 90 - (45 - np.degrees(np.arcsin(1/alpha_size/np.sqrt(2))))
+# rotation_angle = 45
 # rotation_angle = 41
 print(rotation_angle)
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-x_lobe1, y_lobe1 = 1, 1
+x_lobe1, y_lobe1 = 1.1, 1.
 # x_lobe1, y_lobe1 = 1, 1
 
 x_lobe2, y_lobe2 = 1, 1
@@ -163,8 +164,8 @@ a_sin_array_CONST = [1, 1]
 # a_cos_array_CONST = [1.3, 1.3]
 # a_sin_array_CONST = [1.3, 1.3]
 # shift = 0.3  # 0.2
-shift = 0.0  # 0.2
-l1, l2, l3 = 1, 0, 0
+shift = 0  # 0.2
+l1, l2, l3 = 1, 1, 0
 x_shift1, x_shift2 = +shift * l1, -shift * l2
 y_shift1, y_shift2 = -0.0 * l1, +0
 x_shift1 = +shift * np.cos(C_lobe1) * l1
@@ -180,6 +181,9 @@ res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0),\
 	(1.1 * -1.2 / alpha_size, 1.1 * 1.2 / alpha_size)
+alpha_size2 = 10
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-6.0, 6.0), (-6.0, 6.0),\
+	(1.1 * -1.2 / alpha_size2, 1.1 * 1.2 / alpha_size2)
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
           braids_modification=None):

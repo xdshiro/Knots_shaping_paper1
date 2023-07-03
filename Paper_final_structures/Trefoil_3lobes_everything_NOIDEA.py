@@ -135,10 +135,19 @@ def v(x, y, z):
 
 """used modules"""
 plot_milnor_field = 1
-plot_milnor_lines = 1
+plot_milnor_lines = 0
 plot_braids = 0
+real_field = 1
 plot_real_field = 1
 plot_real_lines = 1
+
+rotation_on = True
+scaling_x_on = 0
+scaling_a_on = 0
+shifting_x_on = False
+shifting_z_on = True
+modes_cutoff = 0.01
+modes_cutoff = 0.0001
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
@@ -150,8 +159,11 @@ x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -sh
 y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
 z_shift1, z_shift2, z_shift3 = 0.0, 0.0, 0.0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
+res_x_3D, res_y_3D, res_z_3D = 90, 90, 90
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -434,6 +446,7 @@ phase = np.angle(mesh_3D[0] + 1j * mesh_3D[1])
 mesh_2D_xz = np.meshgrid(x_3D, z_3D, indexing='ij')  #
 R = np.sqrt(mesh_3D[0] ** 2 + mesh_3D[1] ** 2)
 boundary_3D = [[0, 0, 0], [res_x_3D, res_y_3D, res_z_3D]]
+boundary_3D_k = [[0, 0, 0], [res_x_3D_k, res_y_3D_k, res_z_3D_k]]
 """creating the field"""
 # mesh for each brade (in "Milnor" space)
 xyz_array = [
@@ -505,56 +518,68 @@ if plot_braids:
 # new_function = functools.partial(LG_simple_xz, y=y_value, width_gauss=width_gauss)#, width=w * w_spec)
 new_function = functools.partial(LG_simple_xyz, width_gauss=width_gauss)  # , width=w * w_spec)
 field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
-# field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_xz[1], width=width_gauss)
-# plot_field(new_function(*mesh_2D_xz, l=1, p=1))
-# plot_field(np.load('trefoil3d.npy'))
-# plt.show()
-# exit()
-# plot_field(field_norm[:, y_ind, :])
-# plot_field(field_norm)
-# plt.show()
-# exit()
-# values = LG_spectrum(
-#     field_norm[:, y_ind, :], **moments, mesh=mesh_2D_xz, plot=True, width=w * w_spec, k0=1,
-#     functions=new_function
-# )
-# !!!!!!!!!!!
 
-##################################################################################################
-values = cbs.LG_spectrum(
-    field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
-)
-# values = LG_spectrum(
-#     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
-#     functions=new_function
-# )
+if real_field:
+    values = cbs.LG_spectrum(
+        field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
+    )
+    # values = LG_spectrum(
+    #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
+    #     functions=new_function
+    # )
+    
+    field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
+    total = 0
+    l_save = []
+    p_save = []
+    weight_save = []
+    
+    # for l, p_array in enumerate(values):
+    # 	for p, value in enumerate(p_array):
+    # 		if abs(value) > 0.01 * abs(values).max():
+    # 			total += 1
+    # 			l_save.append(l + moment0)
+    # 			p_save.append(p)
+    # 			weight_save.append(value)
+    # 			# weights_important[f'{l + moment0}, {p}'] = value
+    # 			field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+    # 			                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+    # weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+    
+    for l, p_array in enumerate(values):
+        for p, value in enumerate(p_array):
+            if abs(value) > modes_cutoff * abs(values).max():
+                total += 1
+                l_save.append(l + moment0)
+                p_save.append(p)
+                weight_save.append(value)
+                # weights_important[f'{l + moment0}, {p}'] = value
+                field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+                                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+    field_new_3D = field_new_3D / np.abs(field_new_3D).max()
+    weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    print(weights_important)
 
-field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
-total = 0
-l_save = []
-p_save = []
-weight_save = []
-
-for l, p_array in enumerate(values):
-    for p, value in enumerate(p_array):
-        if abs(value) > 0.01 * abs(values).max():
-            total += 1
-            l_save.append(l + moment0)
-            p_save.append(p)
-            weight_save.append(value)
-            # weights_important[f'{l + moment0}, {p}'] = value
-            field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                                 width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
-weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
-scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
-if plot_real_field:
+# scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+if plot_real_field and real_field:
     plot_field(field_new_3D, intensity=False)
     plt.show()
     plot_field(field_new_3D[:, y_ind, :])
     plt.show()
 
-if plot_real_lines:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
+if plot_real_lines and real_field:
+    x_3D_k = np.linspace(*x_lim_3D_k, res_x_3D_k)
+    y_3D_k = np.linspace(*y_lim_3D_k, res_y_3D_k)
+    z_3D_k = np.linspace(*z_lim_3D_k, res_z_3D_k)
+    mesh_3D_k = np.meshgrid(x_3D_k, y_3D_k, z_3D_k, indexing='ij')  #
+    field_new_3D_k = np.zeros((res_x_3D_k, res_y_3D_k, res_z_3D_k)).astype(np.complex128)
+    for l, p_array in enumerate(values):
+        for p, value in enumerate(p_array):
+            if abs(value) > modes_cutoff * abs(values).max():
+                field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
+                                                       width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
+    dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
     plt.show()
 ###################################################################

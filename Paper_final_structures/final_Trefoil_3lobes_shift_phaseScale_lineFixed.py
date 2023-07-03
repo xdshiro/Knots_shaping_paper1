@@ -204,18 +204,44 @@ def v(x, y, z):
 plot_milnor_field = 1
 plot_milnor_lines = 0
 plot_braids = 0
-real_field = 0
+real_field = 1
 plot_real_field = 1
 plot_real_lines = 1
+modes_cutoff = 0.01
+modes_cutoff = 0.0001
+modes_cutoff = 0.03
+modes_cutoff = 0.02
+
+
+shift = 0.325  # 0.2
+shift = 0.0
+shift = 0.15  # 1 line each side boundary condition
+shift = 0.225   # 2 lines each side boundary condition
+# shift = 0.3  # 2 lines each side boundary condition
+
+scale = 1.0
+scale = 1.3
+line_number = 0
+line_number = 1
+line_number = 2
+# line_number = 2
+"""beam parameters"""
+w = 1.3
+w = 1.2
+w = 1.15
+# w = 1.1
+
+w_real = 1.3
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-y_scale1 = 1 / 1.
-y_scale2 = 1 / 1.
-y_scale3 = 1 / 1.
+
+y_scale1 = 1 / scale
+y_scale2 = 1 / scale
+y_scale3 = 1 / scale
 C_lobe1, C_lobe2, C_lobe3 = np.pi * 0 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
-shift = 0.325  # 0.2
+
 BETTA = 0 / 3
 ALPHA = BETTA * (2 / 3) / 1
 l1, l2, l3 = 1, 1, 1
@@ -224,9 +250,10 @@ l1, l2, l3 = 1, 1, 1
 z_shift1, z_shift2, z_shift3 = 0, 0, 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
-x_lim_3D, y_lim_3D, z_lim_3D = (-4.5, 4.5), (-4.5, 4.5), (-1, 1)
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 111, 111, 91
+res_x_3D, res_y_3D, res_z_3D = 100, 100, 100
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -313,9 +340,11 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 - 1, :] += np.pi
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 - 2, :] += np.pi
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 - 3, :] += np.pi
+            if line_number > 0:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 1, :] += np.pi
+            if line_number > 1:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 2, :] += np.pi
+            # angle_3D[:res_x_3D // 2, res_y_3D // 2 - 3, :] += np.pi
             # ar = -np.pi / 6
             # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
             # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
@@ -348,10 +377,12 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 + 1, :] += np.pi
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 + 2, :] += np.pi
-            angle_3D[:res_x_3D // 2, res_y_3D // 2 + 3, :] += np.pi
+            if line_number > 0:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
+            if line_number > 1:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 1, :] += np.pi
+            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 2, :] += np.pi
+            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 3, :] += np.pi
             # ar = np.pi / 6
             # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale3
             # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale3
@@ -585,8 +616,8 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     return ans
 
 
-"""beam parameters"""
-w = 1.03
+
+# w = 1.3
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
@@ -602,6 +633,7 @@ phase = np.angle(mesh_3D[0] + 1j * mesh_3D[1])
 mesh_2D_xz = np.meshgrid(x_3D, z_3D, indexing='ij')  #
 R = np.sqrt(mesh_3D[0] ** 2 + mesh_3D[1] ** 2)
 boundary_3D = [[0, 0, 0], [res_x_3D, res_y_3D, res_z_3D]]
+boundary_3D_k = [[0, 0, 0], [res_x_3D_k, res_y_3D_k, res_z_3D_k]]
 """creating the field"""
 # mesh for each brade (in "Milnor" space)
 xyz_array = [
@@ -630,9 +662,9 @@ field_norm = dg.normalization_field(field_gauss)
 moment0 = moments['l'][0]
 values_total = 0
 y_value = 0
-w_spec = 1
+w_spec = 1.0
 width_gauss = 0.75
-width_gauss = 1
+width_gauss = 1.0
 k_0_spec = 1.6
 # field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # pl.plot_3D_density(np.abs(field_norm))
@@ -709,33 +741,59 @@ if real_field:
     #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
     #     functions=new_function
     # )
-
+    
     field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
     total = 0
     l_save = []
     p_save = []
     weight_save = []
-
+    
+    # for l, p_array in enumerate(values):
+    # 	for p, value in enumerate(p_array):
+    # 		if abs(value) > 0.01 * abs(values).max():
+    # 			total += 1
+    # 			l_save.append(l + moment0)
+    # 			p_save.append(p)
+    # 			weight_save.append(value)
+    # 			# weights_important[f'{l + moment0}, {p}'] = value
+    # 			field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+    # 			                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+    # weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+    
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
-            if abs(value) > 0.01 * abs(values).max():
+            if abs(value) > modes_cutoff * abs(values).max():
                 total += 1
                 l_save.append(l + moment0)
                 p_save.append(p)
                 weight_save.append(value)
                 # weights_important[f'{l + moment0}, {p}'] = value
                 field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
-# weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+                                                     width=1 * w_spec * w_real, k0=1, x0=0, y0=0, z0=0)
+    field_new_3D = field_new_3D / np.abs(field_new_3D).max()
+    weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    print(weights_important)
+
 # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
 if plot_real_field and real_field:
-    plot_field(field_new_3D / np.abs(field_new_3D).max(), intensity=False)
+    plot_field(field_new_3D, intensity=False)
     plt.show()
-# plot_field(field_new_3D[:, y_ind, :])
-# plt.show()
+    plot_field(field_new_3D[:, y_ind, :])
+    plt.show()
 
 if plot_real_lines and real_field:
-    _, dots_init = sing.get_singularities(np.angle(field_new_3D), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=7)
+    x_3D_k = np.linspace(*x_lim_3D_k, res_x_3D_k)
+    y_3D_k = np.linspace(*y_lim_3D_k, res_y_3D_k)
+    z_3D_k = np.linspace(*z_lim_3D_k, res_z_3D_k)
+    mesh_3D_k = np.meshgrid(x_3D_k, y_3D_k, z_3D_k, indexing='ij')  #
+    field_new_3D_k = np.zeros((res_x_3D_k, res_y_3D_k, res_z_3D_k)).astype(np.complex128)
+    for l, p_array in enumerate(values):
+        for p, value in enumerate(p_array):
+            if abs(value) > modes_cutoff * abs(values).max():
+                field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
+                                                       width=1 * w_spec * w_real, k0=1, x0=0, y0=0, z0=0)
+    _, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
+    dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
     plt.show()
 ###################################################################

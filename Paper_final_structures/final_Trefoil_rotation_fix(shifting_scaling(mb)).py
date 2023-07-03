@@ -144,11 +144,14 @@ plot_real_lines = 1
 rotation_on = True
 scaling_x_on = 0
 scaling_a_on = 0
-shifting_x_on = False
+shifting_x_on = False  # ne nado!!!
 shifting_z_on = True
-modes_cutoff = 0.01
+modes_cutoff = 0.03
 modes_cutoff = 0.0001
+modes_cutoff = 0.01
 
+"""beam parameters"""
+w = 1.3
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
@@ -437,8 +440,6 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 	return ans
 
 
-"""beam parameters"""
-w = 1.3
 
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
