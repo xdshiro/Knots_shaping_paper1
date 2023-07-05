@@ -134,17 +134,17 @@ def v(x, y, z):
 
 
 """used modules"""
-rotation_on = 1
+rotation_on = 0
 scaling_x_on = 0
 scaling_a_on = 0
-shifting_z_on = 1
+shifting_z_on = 0
 # save
 
 plot_milnor_field = 1
-plot_milnor_lines = 0
+plot_milnor_lines = 1
 plot_braids = 0
-plot_real_field = 1
-plot_real_lines = 1
+plot_real_field = 0
+plot_real_lines = 0
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
@@ -181,13 +181,12 @@ z_shift2 = 0
 if shifting_z_on:
 	z_shift1 = - 0.25
 	z_shift2 = 0.25
-	# z_shift1 = - 0.3
-	# z_shift2 = 0.3
 # z_shift2 = - 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-6.0, 6.0), (-6.0, 6.0), (-1.5, 1.5)
+x_lim_3D, y_lim_3D, z_lim_3D = (-3.0, 3.0), (-3.0, 3.0), (-1.5, 1.5)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-8.0, 8.0), (-8.0, 8.0), (-0.1, 0.1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
+res_x_3D, res_y_3D, res_z_3D = 251, 251, 251
 # res_x_3D, res_y_3D, res_z_3D = 120, 120, 61
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
@@ -465,6 +464,12 @@ if plot_milnor_field:
 if plot_milnor_lines:
 	_, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
 	dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
+	file_name = (
+			f'hopf_milnor_w={str(w).replace(".", "d")}_x={str(x_3D.max()).replace(".", "d")}' +
+			f'_z={str(z_3D.max()).replace(".", "d")}' +
+			f'_resXY={res_x_3D}_resZ={res_z_3D}'
+	)
+	np.save(file_name, np.array(dots_init))
 	plt.show()
 
 if plot_braids:
