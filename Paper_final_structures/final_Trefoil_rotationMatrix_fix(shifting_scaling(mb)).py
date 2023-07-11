@@ -174,13 +174,13 @@ if shifting_z_on:
 	z_shift1, z_shift2, z_shift3 = -0.3, 0.2, 0.3  # минус вверх
 	z_shift1, z_shift2, z_shift3 = -0.3, 0.3, 0
 	z_shift1, z_shift2, z_shift3 = -0.3, 0.0, 0.3
-	z_shift1, z_shift2, z_shift3 = -0.3, 0.1, 0.3
+	z_shift1, z_shift2, z_shift3 = -0, -0.25, 0.25
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
-res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 60
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 90, 90, 90
+res_x_3D, res_y_3D, res_z_3D = 70, 70, 70
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -217,7 +217,6 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			# plt.show()
 			print('Braid 1:\nLobe 1')
 			A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-
 			# braid_scale = 1.0  # 1.2
 			# x_scale = 1  # 1/1.2
 			# x_shift = 0  # 0.5
@@ -226,7 +225,14 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			phase_mask = (phase > A) & (phase < B)
 			# indexes = np.where(phase_mask)
 			# angle_3D[indexes] += C_lobe1
-			angle_3D[phase_mask] += C_lobe1
+			# angle_3D[phase_mask] += C_lobe1
+			# angle_3D[phase_mask] += C_lobe1
+			# angle_3D[phase_mask] += C_lobe1
+			x_new[phase_mask], y_new[phase_mask], z_new[phase_mask] = (
+				rotate_meshgrid(x_new[phase_mask], y_new[phase_mask], z_new[phase_mask],
+				                np.radians(50), np.radians(00), np.radians(00))
+			)
+			
 			# x_new[phase_mask] *= x_scale
 			# angle_3D[phase_mask] += C_lobe2
 			x_new[phase_mask] += x_shift1
@@ -244,6 +250,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			x_new[phase_mask] += x_shift2
 			y_new[phase_mask] += y_shift2
 			z_new[phase_mask] += z_shift2
+
 			# z_new[phase_mask] += z_shift2
 			# Lobe 3
 			print('Lobe 3')
@@ -264,6 +271,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			x_new[phase_mask] += x_shift2
 			y_new[phase_mask] += y_shift2
 			z_new[phase_mask] += z_shift2
+
 			# Lobe 3
 			print('Lobe 3')
 			# A, B = 0, 0
@@ -391,10 +399,14 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 
 
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
+	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(0), np.radians(0), np.radians(0))
+	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(0), np.radians(0), np.radians(0))
+	# mesh_3D_rotated_2 =mesh_3D
 	xyz_array = [
-		(mesh_3D[0], mesh_3D[1], mesh_3D[2]),
-		(mesh_3D[0], mesh_3D[1], mesh_3D[2])
+		(mesh_3D_rotated_2[0], mesh_3D_rotated_2[1], mesh_3D_rotated_2[2]),
+		(mesh_3D_rotated[0], mesh_3D_rotated[1], mesh_3D_rotated[2])
 	]
+
 	# starting angle for each braid
 	angle_array = np.array([0, 1. * np.pi]) + BETTA  ##0 * np.pi/3
 	print(angle_array)
