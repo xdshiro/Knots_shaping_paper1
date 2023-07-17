@@ -137,7 +137,7 @@ def v(x, y, z):
 plot_milnor_field = 1
 plot_milnor_lines = 0
 plot_braids = 0
-real_field = 1
+real_field = 0
 plot_real_field = 1
 plot_real_lines = 1
 
@@ -149,6 +149,9 @@ shifting_z_on = False
 modes_cutoff = 0.03
 modes_cutoff = 0.0001
 modes_cutoff = 0.01
+
+z_shift_plane_coefficient = -60
+
 
 """beam parameters"""
 w = 1.3
@@ -177,10 +180,13 @@ if shifting_z_on:
 	z_shift1, z_shift2, z_shift3 = -0.3, 0.1, 0.3
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)  #### WRONG
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 90, 90, 90
+res_x_3D, res_y_3D, res_z_3D = 190, 190, 190  #### WRONG
+# res_x_3D, res_y_3D, res_z_3D = 251, 251, 251  #### WRONG
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -217,13 +223,12 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			# plt.show()
 			print('Braid 1:\nLobe 1')
 			A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-
 			# braid_scale = 1.0  # 1.2
 			# x_scale = 1  # 1/1.2
 			# x_shift = 0  # 0.5
 			
 			# phase_mask = (phase >= A) & (phase <= B)
-			phase_mask = (phase > A) & (phase < B)
+			phase_mask = (phase >= A) & (phase <= B)
 			# indexes = np.where(phase_mask)
 			# angle_3D[indexes] += C_lobe1
 			angle_3D[phase_mask] += C_lobe1
@@ -239,7 +244,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			# Lobe 2
 			print('Lobe 2')
 			A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-			phase_mask = (phase < A) & (phase >= -np.pi * 0.9)
+			phase_mask = (phase < A) & (phase >= -np.pi)
 			angle_3D[phase_mask] += C_lobe2
 			x_new[phase_mask] += x_shift2
 			y_new[phase_mask] += y_shift2
@@ -248,7 +253,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			# Lobe 3
 			print('Lobe 3')
 			A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-			phase_mask = (phase > B) & (phase < np.pi * 0.9)
+			phase_mask = (phase > B) & (phase < np.pi)
 			angle_3D[phase_mask] += C_lobe3
 			x_new[phase_mask] += x_shift3
 			y_new[phase_mask] += y_shift3
@@ -492,7 +497,7 @@ k_0_spec = 1.6
 # pl.plot_3D_density(np.abs(field_norm))
 # plt.show()
 if plot_milnor_field:
-	plot_field(field_norm)
+	plot_field(field_norm[:, :, res_z_3D // 2 + z_shift_plane_coefficient])
 	plt.show()
 	# plot_field(field_norm[:, :, res_z_3D//2 - 10])
 	# plt.show()
@@ -518,8 +523,9 @@ if plot_milnor_field:
 	# plt.show()
 if plot_milnor_lines:
 	_, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
-	dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
-	plt.show()
+	fig = dp.plotDots(dots_init, boundary_3D, color='blue', show=False, size=7)
+	fig.write_html('trefoil_milnor.html')
+	fig.show()
 
 if plot_braids:
 	braid = field_of_braids_separate_trefoil(mesh_3D, braid_func=braid_before_trans)
@@ -557,7 +563,7 @@ field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 ##################################################################################################
 if real_field:
 	values = cbs.LG_spectrum(
-		field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
+		field_norm[:, :, res_z_3D // 2 + z_shift_plane_coefficient], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
 	)
 	# values = LG_spectrum(
 	#     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,

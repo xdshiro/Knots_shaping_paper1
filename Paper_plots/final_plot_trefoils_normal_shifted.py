@@ -19,10 +19,10 @@ from scipy.interpolate import splprep, splev
 from scipy.spatial import distance as dist
 from python_tsp.exact import solve_tsp_dynamic_programming
 from python_tsp.heuristics import solve_tsp_simulated_annealing
-from simanneal import Annealer
+# from simanneal import Annealer
 import random
 # import mlrose
-import mlrose_hiive as mlrose
+# import mlrose_hiive as mlrose
 from itertools import combinations
 import matplotlib.colors as mcolors
 

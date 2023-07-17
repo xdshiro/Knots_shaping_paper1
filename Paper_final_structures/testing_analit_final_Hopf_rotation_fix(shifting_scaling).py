@@ -432,6 +432,10 @@ field = field_of_braids_separate_trefoil(mesh_3D, braid_func=braid)
 """field transformations"""
 # cone transformation
 field_milnor = field * (1 + R ** 2) ** 2
+# [ 0.28919175+8.96250649e-18j -0.65619451+0.00000000e+00j
+#   0.4009367 -2.24062662e-18j  0.07947291-2.96596927e-01j
+#  -0.04755592+1.77481114e-01j -0.38436298-2.21912070e-01j]
+field_milnor = field * (1 + z_shift1 ** 2 + R ** 2) * (1 + z_shift2 ** 2 + R ** 2)
 field_gauss = field_milnor * bp.LG_simple(*mesh_3D[:2], 0, l=0, p=0, width=w, k0=1, x0=0, y0=0, z0=0)
 field_norm = dg.normalization_field(field_gauss)
 moment0 = moments['l'][0]
