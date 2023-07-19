@@ -107,9 +107,9 @@ def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=
 			                            functions=functions, **kwargs)
 			# print(l, p, ': ', value, np.abs(value))
 			spectrum[l - l1, p] = value
-		# if np.abs(value) > 0.5:
-		# spectrumReal.append(value)
-		# modes.append((l, p))
+	# if np.abs(value) > 0.5:
+	# spectrumReal.append(value)
+	# modes.append((l, p))
 	# print(modes)
 	if plot:
 		import matplotlib.pyplot as plt
@@ -141,8 +141,8 @@ plot_real_field = 1
 plot_real_lines = 1
 # ANGLE
 alpha_size = 10
-rotation_angle = 45 - np.degrees(np.arcsin(1/alpha_size/np.sqrt(2)))
-rotation_angle = 90 - (45 - np.degrees(np.arcsin(1/alpha_size/np.sqrt(2))))
+rotation_angle = 45 - np.degrees(np.arcsin(1 / alpha_size / np.sqrt(2)))
+rotation_angle = 90 - (45 - np.degrees(np.arcsin(1 / alpha_size / np.sqrt(2))))
 # rotation_angle = 41
 print(rotation_angle)
 
@@ -156,7 +156,6 @@ x_lobe2, y_lobe2 = 1, 1
 # x_lobe2, y_lobe2 = 1, 1
 C_lobe1, C_lobe2 = 0 / 6 * np.pi, 0.0 * np.pi
 C_lobe1, C_lobe2 = np.arctan(np.tan(C_lobe1) / x_lobe1), C_lobe2 * 00
-
 
 a_cos_array_CONST = [1, 1]
 a_sin_array_CONST = [1, 1]
@@ -178,8 +177,9 @@ z_shift2 = 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-6.0, 6.0), (-6.0, 6.0), (-1.5, 1.5)
 res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
-x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0),\
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), \
 	(1.1 * -1.2 / alpha_size, 1.1 * 1.2 / alpha_size)
+
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
           braids_modification=None):
@@ -221,8 +221,8 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			x_new[phase_mask] += x_shift1
 			y_new[phase_mask] += y_shift1
 			z_new[phase_mask] += z_shift1
-			# x_new[phase_mask] *= x_lobe1
-			# y_new[phase_mask] *= y_lobe1
+		# x_new[phase_mask] *= x_lobe1
+		# y_new[phase_mask] *= y_lobe1
 		# plot_field(x_new)
 		# plt.show()
 		elif braids_modification == 1:
@@ -237,12 +237,12 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			x_new[phase_mask] += x_shift2
 			y_new[phase_mask] += y_shift2
 			z_new[phase_mask] += z_shift2
-			# x_new[phase_mask] *= x_lobe2
-			# y_new[phase_mask] *= y_lobe2
-
-		# plot_field(x_new)
-		# plt.show()
-		# exit()
+		# x_new[phase_mask] *= x_lobe2
+		# y_new[phase_mask] *= y_lobe2
+	
+	# plot_field(x_new)
+	# plt.show()
+	# exit()
 	
 	# else:
 	#     x_new = x
@@ -318,9 +318,9 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 	
 	# angle_3D[phase_mask] += C_lobe3
 	
-	
 	return (x + 1j * y) * np.exp(1j * theta) - (
-			cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
+			cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D
+	) * np.exp(1j * angle_3D)
 
 
 # return (x + 1j * y) * np.exp(1j * theta) - (
@@ -329,8 +329,8 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 	# mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(45), np.radians(30), np.radians(30))
-	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180-rotation_angle), np.radians(00), np.radians(0))
-	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180+rotation_angle), np.radians(00), np.radians(0))
+	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180 - rotation_angle), np.radians(00), np.radians(0))
+	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180 + rotation_angle), np.radians(00), np.radians(0))
 	# mesh_3D_rotated_2 =mesh_3D
 	xyz_array = [
 		(mesh_3D_rotated_2[0], mesh_3D_rotated_2[1], mesh_3D_rotated_2[2]),
@@ -538,7 +538,7 @@ if plot_real_lines:
 		for p, value in enumerate(p_array):
 			if abs(value) > modes_cutoff * abs(values).max():
 				field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
-				                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+				                                       width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
 	_, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
 	dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
 	plt.show()

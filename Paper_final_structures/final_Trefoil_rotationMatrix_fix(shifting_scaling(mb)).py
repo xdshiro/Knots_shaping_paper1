@@ -228,11 +228,14 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 			# angle_3D[phase_mask] += C_lobe1
 			# angle_3D[phase_mask] += C_lobe1
 			# angle_3D[phase_mask] += C_lobe1
+			# x_new[phase_mask], y_new[phase_mask], z_new[phase_mask] = (
+			# 	rotate_meshgrid(x_new[phase_mask], y_new[phase_mask], z_new[phase_mask],
+			# 	                np.radians(45), np.radians(00), np.radians(00))
+			# )
 			x_new[phase_mask], y_new[phase_mask], z_new[phase_mask] = (
 				rotate_meshgrid(x_new[phase_mask], y_new[phase_mask], z_new[phase_mask],
-				                np.radians(45), np.radians(00), np.radians(00))
+				                np.radians(0), np.radians(00), np.radians(30))
 			)
-			
 			# x_new[phase_mask] *= x_scale
 			# angle_3D[phase_mask] += C_lobe2
 			x_new[phase_mask] += x_shift1
