@@ -145,12 +145,12 @@ rotation_on = True
 scaling_x_on = 0
 scaling_a_on = 0
 shifting_x_on = False  # ne nado!!!
-shifting_z_on = False
+shifting_z_on = True
 modes_cutoff = 0.03
 modes_cutoff = 0.0001
 modes_cutoff = 0.01
 
-z_shift_plane_coefficient = -60
+z_shift_plane_coefficient = 0
 
 
 """beam parameters"""
@@ -524,7 +524,7 @@ if plot_milnor_field:
 if plot_milnor_lines:
 	_, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
 	fig = dp.plotDots(dots_init, boundary_3D, color='blue', show=False, size=7)
-	fig.write_html('trefoil_milnor.html')
+	# fig.write_html('trefoil_milnor.html')
 	fig.show()
 
 if plot_braids:

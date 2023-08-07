@@ -330,7 +330,11 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
 	# mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(45), np.radians(30), np.radians(30))
 	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180 - rotation_angle), np.radians(00), np.radians(0))
+	mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(-43), np.radians(00), np.radians(0))
+	# mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(180-43), np.radians(00), np.radians(0))
 	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(-180 + rotation_angle), np.radians(00), np.radians(0))
+	mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(43), np.radians(00), np.radians(0))
+	# mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(43-180), np.radians(00), np.radians(0))
 	# mesh_3D_rotated_2 =mesh_3D
 	xyz_array = [
 		(mesh_3D_rotated_2[0], mesh_3D_rotated_2[1], mesh_3D_rotated_2[2]),
@@ -518,6 +522,7 @@ for l, p_array in enumerate(values):
 			# weights_important[f'{l + moment0}, {p}'] = value
 			field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
 			                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+print(np.array(weight_save)/np.linalg.norm(np.array(weight_save)))
 weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
 field_new_3D = field_new_3D / np.abs(field_new_3D).max()
 print(weights_important)
