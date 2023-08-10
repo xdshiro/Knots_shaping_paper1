@@ -134,15 +134,15 @@ def v(x, y, z):
 
 
 """used modules"""
-rotation_on = 1  #
+rotation_on = 0  #
 scaling_x_on = 0
 scaling_a_on = 0
-shifting_z_on = 1  #
+shifting_z_on = 0  #
 # save
 
-plot_milnor_field = 1
+plot_milnor_field = 0
 plot_milnor_lines = 0
-plot_braids = 0
+plot_braids = 1
 plot_real_field = 1
 plot_real_lines = 0
 
@@ -184,10 +184,10 @@ if shifting_z_on:
 # z_shift1 = - 0.3
 # z_shift2 = 0.3
 # z_shift2 = - 0
-x_lim_3D, y_lim_3D, z_lim_3D = (-6.0, 6.0), (-6.0, 6.0), (-1.5, 1.5)
+x_lim_3D, y_lim_3D, z_lim_3D = (-1.0, 1.0), (-1.5, 1.5), (-1.5, 1.5)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-8.0, 8.0), (-8.0, 8.0), (-0.1, 0.1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
+res_x_3D, res_y_3D, res_z_3D = 90, 90, 60
 # res_x_3D, res_y_3D, res_z_3D = 120, 120, 61
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
@@ -305,15 +305,16 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
             # x_shift = 0  # 0.5
 
             # phase_mask = (phase >= A) & (phase <= B)
-            phase_mask = (zAr > A) & (zAr < B)
+            # phase_mask = (zAr > A) & (zAr < B)
             # indexes = np.where(phase_mask)
             # angle_3D[indexes] += C_lobe1
-            angle_3D[phase_mask] += C_lobe1
+            # angle_3D[phase_mask] += C_lobe1
             # x_new[phase_mask] *= x_scale
             # angle_3D[phase_mask] += C_lobe2
-            x_new[phase_mask] += x_shift1
-            y_new[phase_mask] += y_shift1
-            z_new[phase_mask] += z_shift1
+
+            # x_new[phase_mask] += x_shift1
+            # y_new[phase_mask] += y_shift1
+            # z_new[phase_mask] += z_shift1
 
         # plot_field(x_new)
         # plt.show()
@@ -322,11 +323,11 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
             print('Braid 2\nLobe 2')
             # A, B = 0, 0
             A, B = -3 / 3 * np.pi, 3 / 3 * np.pi
-            phase_mask = (zAr >= A) & (zAr <= B)
-            angle_3D[phase_mask] += C_lobe2
-            x_new[phase_mask] += x_shift2
-            y_new[phase_mask] += y_shift2
-            z_new[phase_mask] += z_shift2
+            # phase_mask = (zAr >= A) & (zAr <= B)
+            # angle_3D[phase_mask] += C_lobe2
+            # x_new[phase_mask] += x_shift2
+            # y_new[phase_mask] += y_shift2
+            # z_new[phase_mask] += z_shift2
 
     # angle_3D[phase_mask] += C_lobe3
 
@@ -472,9 +473,12 @@ if plot_milnor_lines:
     plt.show()
 
 if plot_braids:
-    scale = [0.25, 0.25, 2 * np.pi / (z_lim_3D[1] - z_lim_3D[0])]
+    scale = [1, 1, 2 * np.pi / (z_lim_3D[1] - z_lim_3D[0])]
     braid = field_of_braids_separate_trefoil(mesh_3D, braid_func=braid_before_trans,
                                              scale=scale)
+    plot_field(braid[:, :, res_z_3D // 2])
+    plt.show()
+    exit()
     # plot_field(braid)
     # plt.show()
     _, dots_init = sing.get_singularities(np.angle(braid), axesAll=False, returnDict=True)

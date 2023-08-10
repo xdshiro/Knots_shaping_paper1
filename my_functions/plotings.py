@@ -269,9 +269,9 @@ def box_set_go(fig, xyzMinMax=(-1, 1, -1, 1, -1, 1), width=3, perBox=0, mesh=Non
                       scene=dict(
                           # annotations=[dict(x=[ 2], y=[-2], z=[-.5], ax=-2, ay=-2), dict(align='left'),
                           #              dict(align='left')],
-                          xaxis_title=dict(text='x', font=dict(size=26)),
-                          yaxis_title=dict(text='y', font=dict(size=26)),
-                          zaxis_title=dict(text='z', font=dict(size=26)),
+                          xaxis_title=dict(text='x', font=dict(size=45)),
+                          yaxis_title=dict(text='y', font=dict(size=45)),
+                          zaxis_title=dict(text='z', font=dict(size=45)),
 
                           aspectratio_x=aspects[0], aspectratio_y=aspects[1], aspectratio_z=aspects[2],
 

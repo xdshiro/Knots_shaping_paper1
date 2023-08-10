@@ -19,10 +19,10 @@ from scipy.interpolate import splprep, splev
 from scipy.spatial import distance as dist
 from python_tsp.exact import solve_tsp_dynamic_programming
 from python_tsp.heuristics import solve_tsp_simulated_annealing
-from simanneal import Annealer
+# from simanneal import Annealer
 import random
 # import mlrose
-import mlrose_hiive as mlrose
+# import mlrose_hiive as mlrose
 from itertools import combinations
 import matplotlib.colors as mcolors
 
@@ -178,6 +178,7 @@ def plot_torus(r_center=3, r_tube=1., segments=100, rings=100, fig=None,
 	# colorscale = [[0, '#cccccc'], [0.5, '#666666'], [1, '#cccccc']]
 	# colorscale = [[0, '#c3dbd7'], [0.5, '#666666'], [1, '#c3dbd7']]
 	colorscale = [[0, '#95edec'], [0.5, '#666666'], [1, '#95edec']]
+
 	# colorscale = [[0, 'red'], [1, 'blue']]
 	# Create a Mesh3d trace for the cylinder
 	intensity = (phi.flatten() / (2 * np.pi))
@@ -244,12 +245,24 @@ def plot_ring(r_center=3, r_tube=1., segments=100, fig=None,
 		k=[face[2] for face in faces],
 		intensity=np.ones_like(vertices[:, 0]),
 		colorscale=[[0, '#666666'], [0.5, 'purple'], [1, 'blue']],
-		opacity=0.15,
+		opacity=0.1,
+	)
+	theta = np.linspace(0, 2. * np.pi, 500)
+	x = r_center + r_tube * np.cos(theta)
+	y = np.zeros_like(theta)  # Keep the circle in the x-y plane
+	z = r_tube * np.sin(theta)
+	ring_outline = go.Scatter3d(
+		x=x,
+		y=y,
+		z=z,
+		mode='lines',
+		line=dict(color='black', width=2)  # Adjust width as needed
 	)
 	if fig is None:
 		fig = go.Figure()
 	
 	fig.add_trace(ring)
+	fig.add_trace(ring_outline)
 	# pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01, aspects=aspects)
 	if save is not None:
 		fig.write_html(save)
@@ -319,162 +332,171 @@ def find_path(coords, start_index=0):
 	
 	return path
 
+if __name__ == '__main__':
+	# trefoil = np.load('trefoil_math_w=0d95_x=2d5_resXY=211_resZ=211.npy')
+	hopf = np.load('hopf_milnor_w=1d6_x=3d0_z=1d5_resXY=251_resZ=251.npy')
+	# sorted_indices = np.argsort(hopf_braid1[:, -1])[::-1]
+	# hopf_braid1_sorted = hopf_braid1[sorted_indices]
+	res = 251
+	x = hopf[:, 0] - res // 2
+	y = hopf[:, 1] - res // 2
+	z = (hopf[:, 2] - res // 2) / 2
+	# x = (trefoil[:, 0] - res // 2) / res * 5
+	# y = (trefoil[:, 1] - res // 2) / res * 5
+	# z = (trefoil[:, 2] - res // 2) / res * 10
+	# boundary_3D = [[x.min() - 1, y.min() - 1, z.min()],
+	#                [x.max() + 1, y.max() + 1, z.max()]]
 
-# trefoil = np.load('trefoil_math_w=0d95_x=2d5_resXY=211_resZ=211.npy')
-hopf = np.load('hopf_milnor_w=1d6_x=3d0_z=1d5_resXY=251_resZ=251.npy')
-# sorted_indices = np.argsort(hopf_braid1[:, -1])[::-1]
-# hopf_braid1_sorted = hopf_braid1[sorted_indices]
-res = 251
-x = hopf[:, 0] - res // 2
-y = hopf[:, 1] - res // 2
-z = (hopf[:, 2] - res // 2) / 2
-# x = (trefoil[:, 0] - res // 2) / res * 5
-# y = (trefoil[:, 1] - res // 2) / res * 5
-# z = (trefoil[:, 2] - res // 2) / res * 10
-# boundary_3D = [[x.min() - 1, y.min() - 1, z.min()],
-#                [x.max() + 1, y.max() + 1, z.max()]]
-
-dots = np.stack([x, y, z], axis=1)
-# Find the path
-# print(dots)
-length = np.shape(dots)[0]
-dots = dots[find_path(dots * [1, 1, 1], start_index=length // 2 - 1)]
-# dots = np.concatenate((dots[:-2], [dots[0]]), axis=0)
-dots1 = dots[:length // 2]
-# print(dots1)
-# dots1 = curve_3D_smooth(dots1[:, 0], dots1[:, 1], dots1[:, 2], resolution=100, k=3, s=10, b_imp=25)
-# dots1 = curve_3D_smooth(dots1[:, 0], dots1[:, 1], dots1[:, 2])
-dots1 = curve_3D(dots1[:, 0], dots1[:, 1], dots1[:, 2], resolution=200, smoothing_factor=50)
-dots2 = dots[length // 2:-1]
-dots2 = curve_3D(dots2[:, 0], dots2[:, 1], dots2[:, 2], resolution=200, smoothing_factor=50)
-
-# print(dots1)
-
-# dots = salesman(dots) * np.array([5, 5, 1])
-
-center = 0.965
-tube = 1.55
-# trefoil and torus
-if 0:
-	dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
-	                           np.radians(0), np.radians(0), np.radians(00))
-	dots1 = np.array(dots1).T
-	dots2 = np.array(dots2) - np.array([1.3, 0, 0])
+	dots = np.stack([x, y, z], axis=1)
+	# Find the path
+	# print(dots)
+	length = np.shape(dots)[0]
+	dots = dots[find_path(dots * [1, 1, 1], start_index=length // 2 - 1)]
+	# dots = np.concatenate((dots[:-2], [dots[0]]), axis=0)
+	dots1 = dots[:length // 2]
 	# print(dots1)
-	# print(dots2)
-	dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
-	                           np.radians(0), np.radians(0), np.radians(00))
-	dots2 = np.array(dots2).T
+	# dots1 = curve_3D_smooth(dots1[:, 0], dots1[:, 1], dots1[:, 2], resolution=100, k=3, s=10, b_imp=25)
+	# dots1 = curve_3D_smooth(dots1[:, 0], dots1[:, 1], dots1[:, 2])
+	dots1 = curve_3D(dots1[:, 0], dots1[:, 1], dots1[:, 2], resolution=200, smoothing_factor=50)
+	dots2 = dots[length // 2:-1]
+	dots2 = curve_3D(dots2[:, 0], dots2[:, 1], dots2[:, 2], resolution=200, smoothing_factor=50)
 
-	# fig = plot_cylinder(
-	# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
-	# )
-	scale = 1.2
-	boundary_3D = [np.array([- res // 2, - res // 2, - res // 2]) * scale,
-	               np.array([res // 2, res // 2, res // 2]) * scale]
-	width = 35
-	spheres = True
-	fig = plot_torus(
-		r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=None, show=False
-		, segments=100, rings=300,
-	)
-	plot_ring(
-		r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=fig, show=False, segments=100,
-	)
-	# pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	color = ([0, '#660000'], [1, '#ff0000'])
-	plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
-	                  fig=fig, save=None, spheres=spheres)
-	# color = ([0, '#007dff'], [1, '#000099'])
-	color = ([0, '#000099'], [1, '#007dff'])
-	plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color, width=width,
-	                  fig=fig, save=None, spheres=spheres)
-	# color = ([0, '#19ff19'], [1, '#134a0d'])
-	color = ([0, '#134a0d'], [1, '#19ff19'])
-	pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	# fig.write_html('test_torus_braids.html')
-	fig.show()
-	exit()
-
-# rotated
-if 0:
-	dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
-	                        np.radians(0), np.radians(0), np.radians(30))
-	dots1 = np.array(dots1).T
-	dots2 = np.array(dots2) - np.array([1.3, 0, 0])
 	# print(dots1)
-	# print(dots2)
-	dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
-	                        np.radians(0), np.radians(0), np.radians(00))
-	dots2 = np.array(dots2).T
-	
-	# fig = plot_cylinder(
-	# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
-	# )
-	scale = 1.2
-	boundary_3D = [np.array([- res // 2, - res // 2, - res // 2]) * scale,
-	               np.array([res // 2, res // 2, res // 2]) * scale]
-	width = 35
-	spheres = True
-	fig = plot_torus(
-		r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=None, show=False
-		, segments=100, rings=300,
-	)
-	plot_ring(
-		r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=fig, show=False, segments=100,
-	)
-	# pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	color = ([0, '#660000'], [1, '#ff0000'])
-	plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
-	                  fig=fig, save=None, spheres=spheres)
-	# color = ([0, '#007dff'], [1, '#000099'])
-	color = ([0, '#000099'], [1, '#007dff'])
-	plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color, width=width,
-	                  fig=fig, save=None, spheres=spheres)
-	# color = ([0, '#19ff19'], [1, '#134a0d'])
-	color = ([0, '#134a0d'], [1, '#19ff19'])
-	pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	# fig.write_html('test_torus_braids.html')
-	fig.show()
-	exit()
 
-# rotated + shifted
-if 1:
-	dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
-	                        np.radians(0), np.radians(0), np.radians(30))
-	dots1 = np.array(dots1).T + np.array([0, 0, 10])
+	# dots = salesman(dots) * np.array([5, 5, 1])
 
-	dots2 = (np.array(dots2) - np.array([1.3, 0, 0]))
-	dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
-	                        np.radians(0), np.radians(0), np.radians(00))
-	dots2 = np.array(dots2).T - np.array([0, 0, 10])
-	
-	# fig = plot_cylinder(
-	# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
-	# )
-	scale = 1.2
-	boundary_3D = [np.array([- res // 2, - res // 2, - res // 2]) * scale,
-	               np.array([res // 2, res // 2, res // 2]) * scale]
-	width = 35
-	spheres = True
-	fig = plot_torus(
-		r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=None, show=False
-		, segments=100, rings=300,
-	)
-	plot_ring(
-		r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=fig, show=False, segments=100,
-	)
-	# pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	color = ([0, '#660000'], [1, '#ff0000'])
-	plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
-	                  fig=fig, save=None, spheres=spheres)
-	# color = ([0, '#007dff'], [1, '#000099'])
-	color = ([0, '#000099'], [1, '#007dff'])
-	plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color, width=width,
-	                  fig=fig, save=None, spheres=spheres)
-	# color = ([0, '#19ff19'], [1, '#134a0d'])
-	color = ([0, '#134a0d'], [1, '#19ff19'])
-	pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
-	# fig.write_html('test_torus_braids.html')
-	fig.show()
-	exit()
+	center = 0.965
+	tube = 1.55
+	# trefoil and torus
+	if 0:
+		dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
+								   np.radians(0), np.radians(0), np.radians(00))
+		dots1 = np.array(dots1).T
+		dots2 = np.array(dots2) - np.array([1.3, 0, 0])
+		# print(dots1)
+		# print(dots2)
+		dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
+								   np.radians(0), np.radians(0), np.radians(00))
+		dots2 = np.array(dots2).T
+
+		# fig = plot_cylinder(
+		# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
+		# )
+		scale = 1.2
+		boundary_3D = [np.array([- res // 2, - res // 2, - res // 2]) * scale,
+					   np.array([res // 2, res // 2, res // 2]) * scale]
+		width = 35
+		spheres = True
+		fig = plot_torus(
+			r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=None, show=False
+			, segments=100, rings=300,
+		)
+		plot_ring(
+			r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=fig, show=False, segments=100,
+		)
+		# pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+		color = ([0, '#660000'], [1, '#ff0000'])
+		plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color, width=width,
+						  fig=fig, save=None, spheres=spheres)
+		# color = ([0, '#007dff'], [1, '#000099'])
+		color = ([0, '#000099'], [1, '#007dff'])
+		plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
+						  fig=fig, save=None, spheres=spheres)
+		# color = ([0, '#19ff19'], [1, '#134a0d'])
+		color = ([0, '#134a0d'], [1, '#19ff19'])
+		pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+		# fig.write_html('test_torus_braids.html')
+		fig.show()
+		exit()
+
+	# rotated
+	if 0:
+		dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
+								np.radians(0), np.radians(0), np.radians(30))
+		dots1 = np.array(dots1).T
+		dots2 = np.array(dots2) - np.array([1.3, 0, 0])
+		# print(dots1)
+		# print(dots2)
+		dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
+								np.radians(0), np.radians(0), np.radians(00))
+		dots2 = np.array(dots2).T
+
+		# fig = plot_cylinder(
+		# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
+		# )
+		scale = 1.2
+		boundary_3D = [np.array([- res // 2, - res // 2, - res // 2]) * scale,
+					   np.array([res // 2, res // 2, res // 2]) * scale]
+		width = 35
+		spheres = True
+		fig = plot_torus(
+			r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=None, show=False
+			, segments=100, rings=300,
+		)
+		plot_ring(
+			r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=fig, show=False, segments=100,
+		)
+		# pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+		color = ([0, '#660000'], [1, '#ff0000'])
+		plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color, width=width,
+						  fig=fig, save=None, spheres=spheres)
+		# color = ([0, '#007dff'], [1, '#000099'])
+		color = ([0, '#000099'], [1, '#007dff'])
+		plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
+						  fig=fig, save=None, spheres=spheres)
+		# color = ([0, '#19ff19'], [1, '#134a0d'])
+		color = ([0, '#134a0d'], [1, '#19ff19'])
+		pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+		# fig.write_html('test_torus_braids.html')
+		fig.show()
+		exit()
+
+	# rotated + shifted
+	if 1:
+		dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
+								np.radians(0), np.radians(0), np.radians(30))
+		dots1 = np.array(dots1).T + np.array([0, 0, 10])
+
+		dots2 = (np.array(dots2) - np.array([1.3, 0, 0]))
+		dots2 = rotate_meshgrid(dots2[:, 0], dots2[:, 1], dots2[:, 2],
+								np.radians(0), np.radians(0), np.radians(00))
+		dots2 = np.array(dots2).T - np.array([0, 0, 10])
+
+		# fig = plot_cylinder(
+		# 	radius=0.93, height=2 * np.pi, fig=None, show=False, dots_bound=boundary_3D
+		# )
+		scale = 1.2
+		boundary_3D = [np.array([- res // 2, - res // 2, - res // 2]) * scale,
+					   np.array([res // 2, res // 2, res // 2]) * scale]
+		width = 35
+		spheres = True
+		fig = plot_torus(
+			r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=None, show=False
+			, segments=100, rings=300,
+		)
+		plot_ring(
+			r_center=int(res // 4 * center), r_tube=(res // 10) * tube, fig=fig, show=False, segments=100,
+		)
+		# pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+		color = ([0, '#660000'], [1, '#ff0000'])
+		plot_line_colored(dots2, dots_bound=boundary_3D, show=False, color=color, width=width,
+						  fig=fig, save=None, spheres=spheres)
+		# color = ([0, '#007dff'], [1, '#000099'])
+		color = ([0, '#000099'], [1, '#007dff'])
+		plot_line_colored(dots1, dots_bound=boundary_3D, show=False, color=color, width=width,
+						  fig=fig, save=None, spheres=spheres)
+		# color = ([0, '#19ff19'], [1, '#134a0d'])
+		color = ([0, '#134a0d'], [1, '#19ff19'])
+		pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
+		# fig.write_html('test_torus_braids.html')
+		fig.update_layout(
+			scene=dict(
+				camera=dict(
+					eye=dict(x=0, y=0.5, z=0.65),  # Adjust x, y, and z to set the default angle of view
+					#up=dict(x=0, y=1, z=0)
+				)
+			)
+		)
+		fig.write_html(f'hopf_torus_rotated.html')
+		fig.show()
+		exit()

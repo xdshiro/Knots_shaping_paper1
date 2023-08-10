@@ -43,6 +43,8 @@ def plotDots(dots, dots_bound=None, show=True, color='black', size=15, width=185
     :param fig: figure for the combination with other plots
     :return: fig
     """
+    colorLine = 'white'
+    # colorLine = 'black'
     if isinstance(dots, dict):
         dots = np.array([dot for dot in dots])
     if isinstance(dots_bound, dict):
@@ -51,10 +53,10 @@ def plotDots(dots, dots_bound=None, show=True, color='black', size=15, width=185
         dots_bound = dots
     if fig is None:
         fig = pl.plot_3D_dots_go(dots, marker={'size': size, 'color': color,
-                                               'line': dict(width=width, color='white')})
+                                               'line': dict(width=width, color=colorLine)})
     else:
         pl.plot_3D_dots_go(dots, fig=fig, marker={'size': size, 'color': color,
-                                                  'line': dict(width=width, color='white')})
+                                                  'line': dict(width=width, color=colorLine)})
     pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01)
     if save is not None:
         fig.write_html(save)
@@ -62,6 +64,42 @@ def plotDots(dots, dots_bound=None, show=True, color='black', size=15, width=185
         fig.show()
     return fig
 
+def plotDots_Hopf(dots, dots_bound=None, show=True, color='black', size=15, width=185, fig=None,
+             save=None):
+    """
+    Function plots the array of dots in a beautiful and interactive way in your browser.
+    Plots both numpy array and dict
+    :param dots: array of dots
+    :param dots_bound: which dots to use to get the box frames. By default it uses the dots itself,
+        but if you want to make the frames the same with other plots, you can use other dots here, same
+        for all plots.
+    :param show: plotting in the browser. Can be turned off to add extra plots on top
+    :param color: color of the dots
+    :param size: size of the dots
+    :param width: width of the shell of the dots (for a better visualization)
+    :param fig: figure for the combination with other plots
+    :return: fig
+    """
+    colorLine = 'black'
+    # colorLine = 'white'
+    if isinstance(dots, dict):
+        dots = np.array([dot for dot in dots])
+    if isinstance(dots_bound, dict):
+        dots_bound = np.array([dot for dot in dots_bound])
+    if dots_bound is None:
+        dots_bound = dots
+    if fig is None:
+        fig = pl.plot_3D_dots_go(dots, marker={'size': size, 'color': color,
+                                               'line': dict(width=width, color=colorLine)})
+    else:
+        pl.plot_3D_dots_go(dots, fig=fig, marker={'size': size, 'color': color,
+                                                  'line': dict(width=width, color=colorLine)})
+    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01)
+    if save is not None:
+        fig.write_html(save)
+    if show:
+        fig.show()
+    return fig
 
 def neighboursDots(x_c, y_c, z_c, dots_dict):
     """

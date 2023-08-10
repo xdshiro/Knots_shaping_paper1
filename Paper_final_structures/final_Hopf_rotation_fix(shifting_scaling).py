@@ -2,10 +2,14 @@ from functions_based import *
 import my_functions.plotings as pl
 import knots_ML.data_generation as dg
 
+from Paper_plots.final_plot_hopf_normal_shifted import plot_line_colored
 import numpy as np
 from scipy.special import assoc_laguerre
 import my_functions.functions_general as fg
 import math
+from matplotlib.colors import LinearSegmentedColormap
+from sklearn.neighbors import NearestNeighbors
+import matplotlib as mpl
 import scipy.io
 
 
@@ -134,17 +138,32 @@ def v(x, y, z):
 
 
 """used modules"""
-rotation_on = 1  #
+rotation_on = 0  #
+shifting_z_on = 0  #
+
 scaling_x_on = 0
 scaling_a_on = 0
-shifting_z_on = 1  #
 # save
 
-plot_milnor_field = 1
+# name of the map
+map_name = 'cyclic_mygbm'
+# Read the colormap from a file
+custom_cmap_file = np.loadtxt(f'C:\WORK\CODES\Knots_shaping_paper1\cmaps\{map_name}.txt')
+# Create a colormap
+map = LinearSegmentedColormap.from_list(map_name, custom_cmap_file)
+cmapF = 'hsv'
+cmapE = 'afmhot'
+cmapE = 'inferno'
+cmapE = 'hot'
+
+# cmapF = map
+
+plot_milnor_field = 0
 plot_milnor_lines = 0
 plot_braids = 0
+real_field = 1
 plot_real_field = 1
-plot_real_lines = 0
+plot_real_lines = 1
 
 modes_cutoff = 0.03
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
@@ -188,9 +207,13 @@ x_lim_3D, y_lim_3D, z_lim_3D = (-6.0, 6.0), (-6.0, 6.0), (-1.5, 1.5)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-8.0, 8.0), (-8.0, 8.0), (-0.1, 0.1)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 90, 90, 91
-# res_x_3D, res_y_3D, res_z_3D = 120, 120, 61
+res_x_3D, res_y_3D, res_z_3D = 251, 251, 3
+
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 120, 120, 120
+# res_x_3D_k, res_y_3D_k, res_z_3D_k = 12, 12, 12
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.8, 2.8), (-2.8, 2.8), (-1.38, 1.38)
 
 
 def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
@@ -446,7 +469,7 @@ k_0_spec = 1
 # pl.plot_3D_density(np.abs(field_norm))
 # plt.show()
 if plot_milnor_field:
-    plot_field(field_norm)
+    plot_field(field_norm, cmapE=cmapE, cmapF=cmapF)
     plt.show()
     # plot_field(field_norm[:, :, res_z_3D//2 - 10])
     # plt.show()
@@ -460,8 +483,8 @@ if plot_milnor_field:
     # plt.show()
     # plot_field(field_norm[:, :, res_z_3D // 2 - 60])
     # plt.show()
-    plot_field(field_norm[:, y_ind, :])
-    plt.show()
+    # plot_field(field_norm[:, y_ind, :])
+    # plt.show()
 if plot_milnor_lines:
     _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
@@ -483,67 +506,67 @@ if plot_braids:
     dp.plotDots(dots_init, boundary_3D, color='red', show=True, size=7)
     plt.show()
 
-# building 'LG' field
-#################################################################################
+if real_field:
+    # building 'LG' field
+    #################################################################################
 
-# new_function = functools.partial(LG_simple_xz, y=y_value, width_gauss=width_gauss)#, width=w * w_spec)
-new_function = functools.partial(LG_simple_xyz, width_gauss=width_gauss)  # , width=w * w_spec)
-field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
-# field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_xz[1], width=width_gauss)
-# plot_field(new_function(*mesh_2D_xz, l=1, p=1))
-# plot_field(np.load('trefoil3d.npy'))
-# plt.show()
-# exit()
-# plot_field(field_norm[:, y_ind, :])
-# plot_field(field_norm)
-# plt.show()
-# exit()
-# values = LG_spectrum(
-#     field_norm[:, y_ind, :], **moments, mesh=mesh_2D_xz, plot=True, width=w * w_spec, k0=1,
-#     functions=new_function
-# )
-# !!!!!!!!!!!
+    # new_function = functools.partial(LG_simple_xz, y=y_value, width_gauss=width_gauss)#, width=w * w_spec)
+    new_function = functools.partial(LG_simple_xyz, width_gauss=width_gauss)  # , width=w * w_spec)
+    field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
+    # field_norm = np.load('trefoil3d.npy') * gauss_z(x=mesh_2D_xz[0], y=0, z=mesh_2D_xz[1], width=width_gauss)
+    # plot_field(new_function(*mesh_2D_xz, l=1, p=1))
+    # plot_field(np.load('trefoil3d.npy'))
+    # plt.show()
+    # exit()
+    # plot_field(field_norm[:, y_ind, :])
+    # plot_field(field_norm)
+    # plt.show()
+    # exit()
+    # values = LG_spectrum(
+    #     field_norm[:, y_ind, :], **moments, mesh=mesh_2D_xz, plot=True, width=w * w_spec, k0=1,
+    #     functions=new_function
+    # )
+    # !!!!!!!!!!!
 
-##################################################################################################
-values = cbs.LG_spectrum(
-    field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
-)
-# values = LG_spectrum(
-#     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
-#     functions=new_function
-# )
+    ##################################################################################################
+    values = cbs.LG_spectrum(
+        field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=False, width=w * w_spec, k0=1,
+    )
+    # values = LG_spectrum(
+    #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
+    #     functions=new_function
+    # )
 
-field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
-total = 0
-l_save = []
-p_save = []
-weight_save = []
+    field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
+    total = 0
+    l_save = []
+    p_save = []
+    weight_save = []
 
-
-for l, p_array in enumerate(values):
-    for p, value in enumerate(p_array):
-        if abs(value) > modes_cutoff * abs(values).max():
-            total += 1
-            l_save.append(l + moment0)
-            p_save.append(p)
-            weight_save.append(value)
-            # weights_important[f'{l + moment0}, {p}'] = value
-            field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                                 width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
-print(np.array(weight_save))
-print(np.array(weight_save)/np.linalg.norm(np.array(weight_save)))
-field_new_3D = field_new_3D / np.abs(field_new_3D).max()
-weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
-print(weights_important)
+    for l, p_array in enumerate(values):
+        for p, value in enumerate(p_array):
+            if abs(value) > modes_cutoff * abs(values).max():
+                total += 1
+                l_save.append(l + moment0)
+                p_save.append(p)
+                weight_save.append(value)
+                # weights_important[f'{l + moment0}, {p}'] = value
+                field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
+                                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+    print(np.array(weight_save))
+    print(np.array(weight_save) / np.linalg.norm(np.array(weight_save)))
+    field_new_3D = field_new_3D / np.abs(field_new_3D).max()
+    weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    print(weights_important)
 
 # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
-if plot_real_field:
-    plot_field(field_new_3D, intensity=False)
+if plot_real_field and real_field:
+    plot_field(field_new_3D, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
     plt.show()
-    plot_field(field_new_3D[:, y_ind, :])
-    plt.show()
+    # plot_field(field_new_3D[:, y_ind, :])
+    # plt.show()
 
-if plot_real_lines:
+if plot_real_lines and real_field:
     x_3D_k = np.linspace(*x_lim_3D_k, res_x_3D_k)
     y_3D_k = np.linspace(*y_lim_3D_k, res_y_3D_k)
     z_3D_k = np.linspace(*z_lim_3D_k, res_z_3D_k)
@@ -554,7 +577,102 @@ if plot_real_lines:
             if abs(value) > 0.03 * abs(values).max():
                 field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
                                                        width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
+
+
+    def find_path(coords, start_index=0):
+        nbrs = NearestNeighbors(n_neighbors=len(coords)).fit(coords)
+        distances, indices = nbrs.kneighbors(coords)
+
+        visited = set()
+        current_index = start_index
+        path = [current_index]
+        dist = [0]
+        visited.add(current_index)
+
+        while len(path) < len(coords):
+            for idx in indices[current_index]:
+                if idx not in visited:
+                    current_index = idx
+                    break
+            path.append(current_index)
+            visited.add(current_index)
+        diffs = coords[path][1:] - coords[path][:-1]
+        distances = np.linalg.norm(diffs, axis=1)
+        return path, distances
+
+
     _, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
+    dots_init = np.array([[dot[0], res_y_3D_k - dot[1], dot[2]] for dot in dots_init])
+    path_ind, distances = find_path(dots_init, 0)
+    cut = -1  # 2 other
+    if not rotation_on and not shifting_z_on:
+        cut = -4  # normal
+    dots_init = dots_init[path_ind][:cut]
+
+    sorted_indices = np.argsort(distances[:cut])
+    print(distances[:cut])
+    two_largest_indices = sorted_indices[-2:]
+    print(two_largest_indices)
+    if not rotation_on and not shifting_z_on:
+        name_f = ''
+        dots1 = dots_init[:two_largest_indices.min()]  # normal
+        dots2 = dots_init[two_largest_indices.min() + 1:two_largest_indices.max()]  # normal
+    if rotation_on and not shifting_z_on:
+        name_f = 'rotated'
+        dots1 = dots_init[:two_largest_indices.min()]  # rotated
+        dots2 = dots_init[two_largest_indices.max()+1:]  # rotated
+    if rotation_on and shifting_z_on:
+        name_f = 'rotated_shifted'
+        dots1 = dots_init[:two_largest_indices.min()]  # rotated  + shifted
+        dots2 = dots_init[two_largest_indices.min()+1:two_largest_indices.max()]  # rotated + shifted
+
+    dotSize = 12
+    fig = dp.plotDots_Hopf(dots1, boundary_3D_k, color='red', show=False, size=dotSize)
+    # fig = plot_line_colored(dots1, color=([0, '#660000'], [1, '#ff0000']))
+    dp.plotDots_Hopf(dots2, boundary_3D_k, color='royalblue', show=False, size=dotSize, fig=fig)
+    # plot_line_colored(dots2, fig=fig, color=([0, '#ff0000'], [1, '#660000']))
+    fig.update_layout(
+        scene=dict(
+            camera=dict(
+                eye=dict(x=-2.3, y=-2.3, z=2.3)  # Adjust x, y, and z to set the default angle of view
+            )
+        )
+    )
+    fig.write_html(f'hopf_{name_f}_t.html')
+    fig.update_layout(
+        scene=dict(
+            camera=dict(
+                eye=dict(x=0, y=-4, z=0)  # Adjust x, y, and z to set the default angle of view
+            )
+        )
+    )
+    fig.write_html(f'hopf_{name_f}_xz.html')
+    fig.update_layout(
+        scene=dict(
+            camera=dict(
+                eye=dict(x=-4, y=0, z=0),  # Adjust x, y, and z to set the default angle of view
+                up = dict(x=0, y=0, z=1)
+            )
+        )
+    )
+    fig.write_html(f'hopf_{name_f}_yz.html')
+    # fig.update_layout(
+    #     scene=dict(
+    #         camera=dict(
+    #             eye=dict(x=0, y=0, z=3),  # Adjust x, y, and z to set the default angle of view
+    #             up=dict(x=0, y=1, z=0)
+    #         )
+    #     )
+    # )
+    fig.update_layout(
+        scene=dict(
+            camera=dict(
+                eye=dict(x=0, y=0, z=4),  # Adjust x, y, and z to set the default angle of view
+                up=dict(x=0, y=1, z=0)
+            )
+        )
+    )
+    fig.write_html(f'hopf_{name_f}_xy.html')
+    # fig.write_html('hopf_rotated_shifted.html')
     plt.show()
 ###################################################################

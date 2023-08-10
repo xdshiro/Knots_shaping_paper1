@@ -163,38 +163,41 @@ def rotate_3d_field_90(field, axis):
 
 
 # %%
-def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmap='afmhot', intensity=False):
+def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmapE='afmhot', cmapF='jet', intensity=False):
     if len(np.shape(field)) == 3:
         field2D = field[:, :, np.shape(field)[2] // 2]
     else:
         field2D = field
 
-    plt.rc('font', size=12, family='Times New Roman')  # controls default text sizes
+    plt.rc('font', size=16, family='Times New Roman')  # controls default text sizes
     plt.rc('axes', titlesize=24)  # fontsize of the axes title
     plt.rc('axes', labelsize=24)  # fontsize of the x and y labels
     plt.rc('xtick', labelsize=18)  # fontsize of the tick labels
     plt.rc('ytick', labelsize=18)  # fontsize of the tick labels
     plt.rc('legend', fontsize=12)  # legend fontsize
     plt.rc('figure', titlesize=122)  # fontsize of the figure title
-    plt.subplots(1, 2, figsize=(11, 5))
+    cbar_size = 25 # colorbar fontsize
+    plt.subplots(1, 2, figsize=(11.5, 5))
     plt.subplot(1, 2, 1)
     if intensity:
-        plt.imshow(np.abs(field2D.T) ** 2, cmap=cmap, interpolation='nearest')
+        plt.imshow(np.abs(field2D.T) ** 2, cmap=cmapE, interpolation='nearest')
     else:
-        plt.imshow(np.abs(field2D.T), cmap=cmap, interpolation='nearest')
-    plt.colorbar(fraction=0.04, pad=0.02)
+        plt.imshow(np.abs(field2D.T), cmap=cmapE, interpolation='nearest')
+    cbar1 = plt.colorbar(fraction=0.04, pad=0.02)
+    cbar1.ax.tick_params(labelsize=cbar_size)
     plt.title(titles[0])
     if not axes:
         plt.tick_params(top=False, bottom=False, left=False, right=False,
                         labelleft=False, labelbottom=False)
     plt.subplot(1, 2, 2)
-    plt.imshow(np.angle(field2D.T), cmap='jet', interpolation='nearest')  # , cmap='twilight', interpolation='nearest'
-    plt.colorbar(fraction=0.04, pad=0.02)
+    plt.imshow(np.angle(field2D.T), cmap=cmapF, interpolation='nearest')  # , cmap='twilight', interpolation='nearest'
+    cbar2 = plt.colorbar(fraction=0.04, pad=0.02)
+    cbar2.ax.tick_params(labelsize=cbar_size)
     plt.title(titles[1])
     if not axes:
         plt.tick_params(top=False, bottom=False, left=False, right=False,
                         labelleft=False, labelbottom=False)
-    plt.tight_layout()
+    plt.tight_layout(pad=0.1, h_pad=0.1, w_pad=0.1)
 
 if __name__ == "_main_":
     beam_rotation_test = True
