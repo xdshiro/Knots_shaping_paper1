@@ -368,7 +368,7 @@ if __name__ == '__main__':
 	center = 0.965
 	tube = 1.55
 	# trefoil and torus
-	if 0:
+	if 1:
 		dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
 								   np.radians(0), np.radians(0), np.radians(00))
 		dots1 = np.array(dots1).T
@@ -406,11 +406,20 @@ if __name__ == '__main__':
 		color = ([0, '#134a0d'], [1, '#19ff19'])
 		pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
 		# fig.write_html('test_torus_braids.html')
+		fig.update_layout(
+			scene=dict(
+				camera=dict(
+					eye=dict(x=0, y=0.5, z=0.75),  # Adjust x, y, and z to set the default angle of view
+					#up=dict(x=0, y=1, z=0)
+				)
+			)
+		)
+		fig.write_html(f'hopf_torus.html')
 		fig.show()
 		exit()
 
 	# rotated
-	if 0:
+	if 1:
 		dots1 = rotate_meshgrid(dots1[:, 0], dots1[:, 1], dots1[:, 2],
 								np.radians(0), np.radians(0), np.radians(30))
 		dots1 = np.array(dots1).T
@@ -448,6 +457,15 @@ if __name__ == '__main__':
 		color = ([0, '#134a0d'], [1, '#19ff19'])
 		pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 1.0], lines=False)
 		# fig.write_html('test_torus_braids.html')
+		fig.update_layout(
+			scene=dict(
+				camera=dict(
+					eye=dict(x=0, y=0.5, z=0.75),  # Adjust x, y, and z to set the default angle of view
+					#up=dict(x=0, y=1, z=0)
+				)
+			)
+		)
+		fig.write_html(f'hopf_torus_rotated.html')
 		fig.show()
 		exit()
 
@@ -497,6 +515,6 @@ if __name__ == '__main__':
 				)
 			)
 		)
-		fig.write_html(f'hopf_torus_rotated.html')
+		fig.write_html(f'hopf_torus_rotated_shifted.html')
 		fig.show()
 		exit()

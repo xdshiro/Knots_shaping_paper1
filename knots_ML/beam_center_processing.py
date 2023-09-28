@@ -16,7 +16,21 @@ import my_functions.functions_general as fg
 import my_functions.singularities as sing
 import my_functions.plotings as pl
 import my_functions.beams_and_pulses as bp
+import matplotlib.pyplot as plt
 import numpy as np
+import scipy.io as sio
+from data_generation import *
+
+
+from collections import Counter
+
+x = Counter("cat")
+y = Counter("dat")
+print(x.subtract(y))
+x.update(x)
+x = +x
+print(x)
+exit()
 
 def LG_spectre_coeff(field, l, p, xM=(-1, 1), yM=(-1, 1), width=1., k0=1., mesh=None, functions=bp.LG_simple):
     """
@@ -198,6 +212,7 @@ def variance_single_transition_combined(field, mesh, r, eta, eta2, gamma,
     V = variance_V_helper(Pl, np.arange(l1, l2 + 1))
     return V
 
+
 def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=1., mesh=None, plot=True,
                 functions=bp.LG_simple, **kwargs):
     """
@@ -213,7 +228,6 @@ def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=
     :param plot:
     :return:
     """
-    print('hi')
     l1, l2 = l
     p1, p2 = p
     spectrum = np.zeros((l2 - l1 + 1, p2 - p1 + 1), dtype=complex)
@@ -481,6 +495,17 @@ def variance_map_tilt(beam, mesh, displacement_function=displacement_deflection,
     return V
 
 
+def find_beam_waist(field, mesh=None):
+    """
+    wrapper for the beam waste finder. More details in knots_ML.center_beam_search
+    """
+    shape = np.shape(field)
+    if mesh is None:
+        mesh = fg.create_mesh_XY(xRes=shape[0], yRes=shape[1])
+    width = find_width(field, mesh=mesh, width=shape[1] // 4, widthStep=1, print_steps=False)
+    return width
+
+
 def center_beam_finding(beam, mesh, stepXY=None, displacement_function=displacement_lateral,
                         p=(0, 5), l=(0, 4), p0=(0, 5), l0=(-3, 3),
                         width=1, k0=1, x=None, y=None):
@@ -508,7 +533,7 @@ def center_beam_finding(beam, mesh, stepXY=None, displacement_function=displacem
             var = variance_single_transition(beam, mesh=mesh, displacement_function=displacement_function,
                                              r=fg.rho(x, y), eta=np.angle(x + 1j * y),
                                              p=p, l=l, p0=p0, l0=l0, width=width, k0=k0)
-            print(f'x={x}, y={y}, var={var}')
+            # print(f'x={x}, y={y}, var={var}')
             if var < varIt:
                 varIt = var
                 correctWay = True
@@ -589,127 +614,295 @@ def tilt_beam_finding(beam, mesh, stepEG=None, displacement_function=displacemen
             var0 = varEG
 
 
+def field_interpolation(field, mesh=None, resolution=(100, 100),
+                        xMinMax_frac=(1, 1), yMinMax_frac=(1, 1), fill_value=True):
+    """
+    Wrapper for the field interpolation fg.interpolation_complex
+    :param resolution: new field resolution
+    :param xMinMax_frac: new dimension for the field. (x_dim_old * frac)
+    :param yMinMax_frac: new dimension for the field. (y_dim_old * frac)
+    """
+    shape = np.shape(field)
+    if mesh is None:
+        mesh = fg.create_mesh_XY(xRes=shape[0], yRes=shape[1])
+    interpol_field = fg.interpolation_complex(field, mesh=mesh, fill_value=fill_value)
+    xMinMax = int(shape[0] // 2 * xMinMax_frac[0]), int(shape[0] // 2 * xMinMax_frac[1])
+    yMinMax = int(shape[1] // 2 * yMinMax_frac[0]), int(shape[1] // 2 * yMinMax_frac[1])
+    xyMesh_interpol = fg.create_mesh_XY(
+        xRes=resolution[0], yRes=resolution[1],
+        xMinMax=xMinMax, yMinMax=yMinMax)
+    return interpol_field(*xyMesh_interpol), xyMesh_interpol
+
+
+def normalization_field(field):
+    """
+    Normalization of the field for the beam center finding
+    """
+    field_norm = field / np.sqrt(np.sum(np.abs(field) ** 2))
+    return field_norm
+
+
+def read_field_2D_single(path, field=None):
+    """
+    Function reads .mat 2D array from matlab and convert it into numpy array
+
+    If field is None, it will try to find the field name automatically
+
+    :param path: full path to the file
+    :param field: the name of the column with the field you want to read
+    """
+    field_read = sio.loadmat(path, appendmat=False)
+    if field is None:
+        for field_check in field_read:
+            if len(np.shape(np.array(field_read[field_check]))) == 2:
+                field = field_check
+                break
+    return np.array(field_read[field])
+
+
+def plot_field(field, save=None):
+    """
+    Function plots intensity and phase of the field in 1 plot.
+    Just a small convenient wrapper
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
+    image1 = ax1.imshow(np.abs(field))
+    ax1.set_title('|E|')
+    plt.colorbar(image1, ax=ax1, shrink=0.4, pad=0.02, fraction=0.1)
+    image2 = ax2.imshow(np.angle(field), cmap='jet')
+    ax2.set_title('Phase(E)')
+    plt.colorbar(image2, ax=ax2, shrink=0.4, pad=0.02, fraction=0.1)
+    plt.tight_layout()
+    if save is not None:
+        fig.savefig(save, format='png')
+    plt.show()
+
+
+def main_field_processing(
+        path,
+        field_name=None,
+        plotting=True,
+        resolution_iterpol_center=(70, 70),
+        stepXY=(3, 3),
+        zero_pad=0,
+        xMinMax_frac_center=(1, 1),
+        yMinMax_frac_center=(1, 1),
+        resolution_interpol_working=(150, 150),
+        xMinMax_frac_working=(1, 1),
+        yMinMax_frac_working=(1, 1),
+        resolution_crop=(120, 120),
+        moments_init=None,
+        moments_center=None,
+):
+    """
+    This function:
+     1) reading the field from matlab file
+     2) converting it into numpy array
+     3) normalizing
+     4) finding the beam waste
+     5) rescaling the field, using the interpolation, for faster next steps
+     6) finding the beam center
+     7) rescaling field to the scale we want for 3D calculations
+     8) removing the tilt and shift
+
+    Assumption
+    ----------
+    Beam waist finder only works with a uniform grid (dx = dy)
+
+    :param path: file name
+    :param plotting: if we want to see the plots and extra information
+    :param resolution_iterpol_center: resolution for the beam center finder
+    :param xMinMax_frac_center: rescale ration along X axis for the beam center
+    :param yMinMax_frac_center: rescale ration along Y axis for the beam center
+    :param resolution_interpol_working: resolution for the final field before the cropping
+    :param xMinMax_frac_working: rescale ration along X axis for the beam center
+    :param yMinMax_frac_working: rescale ration along X axis for the beam center
+    :param resolution_crop: actual final resolution of the field
+    :param moments_init: the moments for the LG spectrum
+    :param moments_center: the moments for the beam center finder
+    :return: 2D complex field
+    """
+    # beam width search work only with x_res==y_res
+    if moments_init is None:
+        moments_init = {'p': (0, 6), 'l': (-4, 4)}
+    if moments_center is None:
+        moments_center = {'p0': (0, 6), 'l0': (-4, 4)}
+
+    # reading file
+    field_init_all = read_field_2D_single(path, field=field_name)
+    xy_coordinates = []
+    for i in range(0, field_init_all.shape[2], 1):
+        field_init = field_init_all[:, :, i]
+        if plotting or True:
+            plot_field(field_init)
+        continue
+        # normalization
+        field_norm = normalization_field(field_init)
+        if plotting:
+            plot_field(field_norm)
+
+        # creating mesh
+        mesh_init = fg.create_mesh_XY(xRes=np.shape(field_norm)[0], yRes=np.shape(field_norm)[1])
+
+        # finding beam waste
+        width = float(find_beam_waist(field_norm, mesh=mesh_init))
+        if plotting or False:
+            print(f'Approximate beam waist: {width}')
+
+        # rescaling field
+        field_interpol, mesh_interpol = field_interpolation(
+            field_norm, mesh=mesh_init,
+            resolution=(resolution_iterpol_center[0] - zero_pad * 2, resolution_iterpol_center[1] - zero_pad * 2),
+            xMinMax_frac=xMinMax_frac_center, yMinMax_frac=yMinMax_frac_center
+        )
+
+        # padding with 0
+        if zero_pad:
+            field_interpol = np.pad(field_interpol, zero_pad, 'constant')
+            shape = np.shape(field_norm)
+            xMinMax = int(shape[0] // 2 * xMinMax_frac_center[0]), int(shape[0] // 2 * xMinMax_frac_center[1])
+            yMinMax = int(shape[1] // 2 * yMinMax_frac_center[0]), int(shape[1] // 2 * yMinMax_frac_center[1])
+            mesh_interpol = fg.create_mesh_XY(
+                xRes=resolution_iterpol_center[0], yRes=resolution_iterpol_center[1],
+                xMinMax=xMinMax, yMinMax=yMinMax)
+
+        if plotting or False:
+            plot_field(field_interpol)
+
+        # rescaling the beam width
+        scaling_factor = 1. / np.shape(field_norm)[0] * np.shape(field_interpol)[0]
+        # print(width)
+        # width *= scaling_factor
+        # print(width, width / scaling_factor)
+        ###################################################
+        # plotting spec to select moments. .T because Danilo's code saving it like that
+        if plotting or False:
+            _ = LG_spectrum(field_interpol.T, **moments_init, mesh=mesh_interpol, plot=True, width=width, k0=1)
+
+        # finding the beam center
+        ## moments_init.update(moments_center)
+        ## moments = moments_init
+        # x, y, eta, gamma = beamFullCenter(
+        #     field_interpol, mesh_interpol,
+        #     stepXY=stepXY, stepEG=(1 / 180 * np.pi, 1 / 180 * np.pi),
+        #     x=None, y=None, eta2=0., gamma=0.,
+        #     **moments_center, threshold=1, width=width, k0=1, print_info=plotting
+        # )
+        x, y = center_beam_finding(field_interpol, mesh_interpol,
+                                   stepXY=stepXY, displacement_function=displacement_lateral,
+                                   **moments_center,
+                                   width=width, k0=1, x=None, y=None)
+        # xy_coordinates.append((x / scaling_factor, y / scaling_factor))
+        # xy_coordinates.append((x, y, eta, gamma))
+        xy_coordinates.append((x, y))
+        eta = 0
+        gamma = 0
+
+        print(f'coordinates: {x, y}; tilt: {eta},{gamma}')
+        # print(f'coordinates: {x, y}; tilt: {eta},{gamma}')
+        # print(f'coordinates in the initial mesh: {x / scaling_factor, y / scaling_factor};'
+        #       f' tilt: {eta},{gamma}')
+        # x, y, eta, gamma = 0, 0, 0, 0
+
+        # rescaling field to the scale we want for 3D calculations
+        field_interpol2, mesh_interpol2 = field_interpolation(
+            field_norm, mesh=mesh_init, resolution=resolution_interpol_working,
+            xMinMax_frac=xMinMax_frac_working, yMinMax_frac=yMinMax_frac_working, fill_value=False
+        )
+        if plotting:
+            plot_field(field_interpol2)
+
+        # removing the tilt
+        field_untilted = removeTilt(field_interpol2, mesh_interpol2, eta=-eta, gamma=gamma, k=1)
+        if plotting:
+            plot_field(field_untilted)
+
+        # scaling the beam center
+        shape = np.shape(field_untilted)
+        scaling_factor2 = 1. / np.shape(field_interpol)[0] * shape[0]
+        x = int(x * scaling_factor * scaling_factor2)
+        y = int(y * scaling_factor * scaling_factor2)
+        # x = int(x / np.shape(field_interpol)[0] * shape[0])
+        # y = int(y / np.shape(field_interpol)[1] * shape[1])
+
+        # cropping the beam around the center
+        field_cropped = field_untilted[
+                        shape[0] // 2 - x - resolution_crop[0] // 2:shape[0] // 2 - x + resolution_crop[0] // 2,
+                        shape[1] // 2 - y - resolution_crop[1] // 2:shape[1] // 2 - y + resolution_crop[1] // 2]
+        if plotting or True:
+            plot_field(field_cropped)
+
+        # selecting the working field and mesh
+        mesh = fg.create_mesh_XY(xRes=np.shape(field_cropped)[0], yRes=np.shape(field_cropped)[1])
+        field = field_cropped
+        # print(f'field finished: {path[-20:]}')
+    print(xy_coordinates)
+    np.save('coordinates_unmod2.npy', np.array(xy_coordinates))
+    # return field, mesh
+
+
 ####################################################################################
 
 
 if __name__ == '__main__':
+    finding_center_danilos_files = True
+    if finding_center_danilos_files:
+        # test = np.load('coordinates_unmod2.npy')
+        # print(test.shape)
+        # np.savetxt('centers_unmod2.txt', np.round(test)[1::2])
+        # np.savetxt('centers2.txt', np.round(test * 2) / 2)
+        # exit()
+        # path = f'Uz_trefoilmod_exp.mat'
+        path = f'Uz_trefoilunmod_exp.mat'
+        main_field_processing(
+            path,
+            field_name='Uz',
+            plotting=False,
+            resolution_iterpol_center=(80, 80),
+            stepXY=(1, 1),
+            zero_pad=0,
+            xMinMax_frac_center=(-1., 1.),
+            yMinMax_frac_center=(-1., 1.),
+            resolution_interpol_working=(80, 80),
+            xMinMax_frac_working=(-1, 1),
+            yMinMax_frac_working=(-1, 1),
+            resolution_crop=(65, 65),
+            # moments_init={'p': (0, 10), 'l': (-7, 5)},
+            moments_init={'p': (0, 6), 'l': (-5, 3)},
+            # moments_center={'p': (0, 10), 'l': (-7, 5)})
+            moments_center={'p': (0, 5), 'l': (-4, 2)})
 
-    # test = np.load('coordinates.npy')
-    # np.savetxt('centers3.txt', test)
-    # np.savetxt('centers2.txt', np.round(test))
-    # exit()
-    import matplotlib.pyplot as plt
+    dots_building_ = False
+    resolution_crop = (140, 140)
+    empty = np.array([[0, 0, 0]])
+    if dots_building_:
+        path = f'Uz_trefoilsingleunmod.mat'
+        field_init_all = read_field_2D_single(path, field='Uz')
+        for i in range(np.shape(field_init_all)[2]):
+        # for i in range(2):
+            field2D = field_init_all[:, :, i]
+            # plt.imshow(np.angle(field2D))
+            # plt.show()
+            # plt.imshow(np.abs(field2D))
+            # plt.show()
+            # exit()
+            dots_raw, dots_filtered = main_dots_building(
+                field2D=field2D,
+                plotting=False,
+                dz=22,
+                steps_both=27,
+                resolution_crop=resolution_crop,
+                r_crop=140
+            )
+            empty = np.concatenate((empty, dots_raw), axis=0)
 
-    xB, yB = [-4, 4], [-4, 4]
-    xyMesh = fg.create_mesh_XY_old(xB[1], yB[1], 40, 40, xMin=xB[0], yMin=yB[0])
-
-    xDis = 0.4
-    yDis = -0.3
-    eta = 40
-    gamma = 10
-
-
-    def beamF(*xyMesh, width=1, **kwargs):
-        return bp.LG_combination(*xyMesh,
-                                 coefficients=[1 / np.sqrt(2), 1 / np.sqrt(2)],
-                                 # coefficients=[1, 0],
-                                 modes=[(0, 0), (2, 1)],
-                                 width=[width, width], x0=xDis, y0=yDis, **kwargs)
-
-
-    beam_displaced = displacement_lateral(beamF, xyMesh, r_0=fg.rho(xDis, yDis),
-                                          eta=np.angle(xDis + 1j * yDis))
-    beam = beam_displaced
-    ########
-    # xyMesh = fg.create_mesh_XY(xRes=50, yRes=50)
-    # beam = beamF(*xyMesh, width=7) * 10
-    # beam = beam / np.sqrt(np.sum(np.abs(beam)**2))
-    # print(np.sum(np.abs(beam)**2) )
-    # pl.plot_2D(np.abs(beam))
-    # exit()
-    beam_tilted = displacement_deflection(beamF, xyMesh,
-                                          eta=eta * np.pi / 180, gamma=gamma * np.pi / 180)
-    beam = beam_tilted
-
-    pl.plot_2D(np.abs(beam_tilted))
-    pl.plot_2D(np.angle(beam_tilted))
-    pl_dict = {'p': (0, 3), 'l': (-3, 4), 'p0': (0, 3), 'l0': (-3, 4)}
-    # beam_center_coordinates(beam, xyMesh, stepXY=(0.1, 0.1), stepEG=(0.1, 0.1),
-    #                         **pl_dict,
-    #                         width=1, k0=1, x=0, y=0, eta=0., gamma=0.,
-    #                         shift=True, tilt=False, fast=False)
-    # new_xy_mesh = removeShift(xyMesh, 0.5, 0.5)
-    # beam = removeTilt(beam, new_xy_mesh, eta=30*np.pi/180, gamma=-20*np.pi/180)
-    beam = removeTilt(beam, xyMesh, eta=140 / 180 * np.pi, gamma=10 / 180 * np.pi)
-    ax = pl.plot_2D(np.abs(beam), x=[-4, 4], y=[-4, 4], show=False)
-    pl.plot_scatter_2D(x=0.4, y=-0.3, xlim=[-4, 4], ylim=[-4, 4], ax=ax, color='g', size=150, show=True)
-    pl.plot_2D(np.angle(beam), x=[-4, 4], y=[-4, 4])
-    exit()
-    spec = LG_spectrum(beam, l=(-4, 5), p=(0, 4), mesh=xyMesh, plot=True, width=1, k0=1)
-
-    beamFullCenter(beam, xyMesh, stepXY=(0.1, 0.1), stepEG=(5 / 180 * np.pi, 1 / 180 * np.pi),
-                   **pl_dict, threshold=1,
-                   width=1, k0=1, x=0, y=0, eta2=0., gamma=0.)
-    exit()
-
-    beam_center_coordinates(beam, xyMesh, stepXY=(0.1, 0.1), stepEG=(2.5 / 180 * np.pi, 2.5 / 180 * np.pi),
-                            **pl_dict,
-                            width=1, k0=1, x=0, y=0, eta=0., gamma=0.,
-                            shift=True, tilt=True, fast=False)
-    exit()
-    width = 1.0
-    k0 = 1
-    # V = variance_map_tilt(beam=beam, mesh=xyMesh,
-    #                       resolution_V=(5, 5), etaBound=((eta-10) * np.pi / 180, (eta + 10) * np.pi / 180),
-    #                       gammaBound=((-gamma-10) * np.pi / 180, (-gamma+10) * np.pi / 180),
-    #                       **pl_dict, width=width)
-    # print(V)
-    # pl.plot_2D(V, x=[eta-10, eta+10], y=[-gamma-10, -gamma+10])
-    # V = variance_map_shift(beam=beam, mesh=xyMesh,
-    #                  resolution_V=(5, 5), xBound=(-1, 1), yBound=(-1, 1),
-    #                  **pl_dict, width=width)
-    # print(V)
-    # pl.plot_2D(V, x=[-1, 1], y=[-1, 1])
-    # exit()
-
-    check_spectrum = False
-    if check_spectrum:
-        l1, l2 = -3, 3
-        p1, p2 = 0, 3
-        spectrum = np.zeros((l2 - l1 + 1, p2 - p1 + 1))
-        spectrumReal = []
-        modes = []
-        for l in np.arange(l1, l2 + 1):
-            for p in np.arange(p1, p2 + 1):
-                value = LG_spectre_coeff(beam, l=l, p=p, xM=xB, yM=yB, width=1, k0=1)
-                # print(l, p, ': ', value, np.abs(value))
-                spectrum[l - l1, p] = np.abs(value)
-                # if np.abs(value) > 0.5:
-                spectrumReal.append(value)
-                modes.append((l, p))
-        # print(modes)
-
-        pl.plot_2D(spectrum, y=np.arange(l1 - 0.5, l2 + 1 + 0.5), x=np.arange(p1 - 0.5, p2 + 1 + 0.5),
-                   interpolation='none', grid=True, xname='p', yname='l', show=False)
-        plt.yticks(np.arange(p1, p2 + 1))
-        plt.xticks(np.arange(l1, l2 + 1))
-        plt.show()
-        exit()
-        beam = bp.LG_combination(*xyMesh, coefficients=spectrumReal, modes=modes)
-        pl.plot_2D(np.abs(beam), axis_equal=True)
-        pl.plot_2D(np.angle(beam), axis_equal=True, vmin=-np.pi, vmax=np.pi)
-        sing.Jz_calc_no_conj(beam)
-
-    plot_trefoil = True
-    if plot_trefoil:
-        xyzMesh = fg.create_mesh_XYZ(2.1, 2.1, 0.7, 50, 50, 50, zMin=None)
-        beam = bp.LG_combination(*xyzMesh,
-                                 coefficients=[1.71, -5.66, 6.38, -2.30, -4.36],
-                                 modes=[(0, 0), (0, 1), (0, 2), (0, 3), (3, 0)],
-                                 width=[1, 1, 1, 1, 1])
-        dots = sing.get_singularities(np.angle(beam))
-        # pl.plot_2D(np.abs(beam[:, :, zRes//2]))
-        # pl.plot_scatter_3D(dots[:, 0], dots[:, 1], dots[:, 2])
-        fig = pl.plot_3D_dots_go(dots)
-        pl.box_set_go(fig, mesh=None, autoDots=dots, perBox=0.05)
-        fig.show()
+        empty = np.delete(empty, 0, 0)
+        np.save('all_dots.npy', empty)
+        # exit()
+        # file_save_dots_raw = directory_field_saved_dots + 'raw_' + file[:-4] + '.npy'
+        # file_save_dots_filtered = directory_field_saved_dots + 'filtered_' + file[:-4] + '.npy'
+        dp.plotDots(empty, empty, color='black', show=True, size=15,
+                    save=None)
+                    # save=directory_field_saved_plots + file[:-4] + '_3D.html')
+        # np.save(file_save_dots_raw, dots_raw)
+        # np.save(file_save_dots_filtered, dots_filtered)

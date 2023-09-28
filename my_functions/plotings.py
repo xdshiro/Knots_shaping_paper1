@@ -125,7 +125,7 @@ def plot_3D_density(E, resDecrease=(1, 1, 1), mesh=None,
                     xMinMax=None, yMinMax=None, zMinMax=None,
                     surface_count=20, show=True,
                     opacity=0.5, colorscale='RdBu',
-                    opacityscale=None, fig=None, **kwargs):
+                    opacityscale=None, fig=None,  scaling=None, **kwargs):
     """
     Function plots 3d density in the browser
     :param E: anything in real number to plot
@@ -158,6 +158,10 @@ def plot_3D_density(E, resDecrease=(1, 1, 1), mesh=None,
                   ]
     else:
         X, Y, Z = mesh
+    if scaling is not None:
+        X *= scaling[0]
+        Y *= scaling[1]
+        Z *= scaling[2]
     values = E[::resDecrease[0], ::resDecrease[1], ::resDecrease[2]]
     if fig is None:
         fig = go.Figure()

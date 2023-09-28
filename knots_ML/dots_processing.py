@@ -65,7 +65,7 @@ def plotDots(dots, dots_bound=None, show=True, color='black', size=15, width=185
     return fig
 
 def plotDots_Hopf(dots, dots_bound=None, show=True, color='black', size=15, width=185, fig=None,
-             save=None):
+             save=None, lines=True, **kwargs):
     """
     Function plots the array of dots in a beautiful and interactive way in your browser.
     Plots both numpy array and dict
@@ -94,7 +94,7 @@ def plotDots_Hopf(dots, dots_bound=None, show=True, color='black', size=15, widt
     else:
         pl.plot_3D_dots_go(dots, fig=fig, marker={'size': size, 'color': color,
                                                   'line': dict(width=width, color=colorLine)})
-    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01)
+    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01, lines=lines, **kwargs)
     if save is not None:
         fig.write_html(save)
     if show:

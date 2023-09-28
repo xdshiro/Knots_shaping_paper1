@@ -412,7 +412,7 @@ if 1:
     plot_line_colored(dots1, show=False, color=color, width=width, fig=fig, save=None)
     plot_line_colored(dots2, show=False, color=color2, width=width, fig=fig, save=None)
 
-    pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 2.5], lines=False)
+    pl.box_set_go(fig, mesh=None, autoDots=boundary_3D, perBox=0.01, aspects=[1.0, 1.0, 3], lines=False)
     fig.update_layout(
         scene=dict(
             camera=dict(
@@ -420,7 +420,7 @@ if 1:
             )
         )
     )
-    fig.write_html('hopf_braids_normal.html')
+    fig.write_html('hopf_braids_normal_ar3.html')
 
     fig.show()
     exit()

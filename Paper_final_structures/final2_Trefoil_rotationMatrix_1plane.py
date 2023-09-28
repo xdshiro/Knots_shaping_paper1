@@ -8,74 +8,8 @@ import my_functions.functions_general as fg
 import math
 import scipy.io
 
-
-# def scale_along_axis(mesh, axis, s):
-#     # Normalize the axis vector
-#     axis = np.array(axis) / np.linalg.norm(axis)
-#
-#     # Reshape the axis to (3, 1, 1, 1) so it can be broadcasted properly
-#     axis = axis[:, np.newaxis, np.newaxis, np.newaxis]
-#
-#     # Compute the dot product of each point in the mesh with the axis
-#     dot_product = np.sum(mesh * axis, axis=0)
-#
-#     # Project each point onto the axis
-#     proj = dot_product * axis
-#
-#     # Compute the component of each point orthogonal to the axis
-#     orth = mesh - proj
-#
-#     # Scale the projection
-#     proj_scaled = s * proj
-#
-#     # Compute the new points
-#     new_mesh = proj_scaled + orth
-#
-#     return new_mesh
-
-
-def scale_along_axis(xy, axis, scale):
-    # Normalize the axis vector
-    axis = axis / np.linalg.norm(axis)
-
-    # Project all points onto the axis vector
-    proj = np.dot(xy, axis)
-
-    # Calculate the vector component that is orthogonal to the axis
-    ortho = xy - np.outer(proj, axis)
-
-    # Scale the projections
-    proj_scaled = proj * scale
-
-    # Calculate the final points
-    xy_final = np.outer(proj_scaled, axis) + ortho
-
-    return xy_final[:, 0], xy_final[:, 1]
-
-def reflect_along_axis(xy, axis, reflection_point):
-    # Normalize the axis vector
-    axis = axis / np.linalg.norm(axis)
-
-    # Translate points such that reflection point is at origin
-    xy_translated = xy - reflection_point
-
-    # Project all points onto the axis vector
-    proj = np.dot(xy_translated, axis)
-
-    # Calculate the vector component that is orthogonal to the axis
-    ortho = xy_translated - np.outer(proj, axis)
-
-    # Reflect the projections (change their sign)
-    proj_reflected = -proj
-
-    # Calculate the new points
-    xy_final = np.outer(proj_reflected, axis) + ortho
-
-    # Translate points back
-    xy_final += reflection_point
-
-    return xy_final[:, 0], xy_final[:, 1]
-
+  # Angle in degrees
+# exit()
 def gauss_z(x, y, z, width):
     if width is None:
         return 1
@@ -174,9 +108,9 @@ def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=
                                         functions=functions, **kwargs)
             # print(l, p, ': ', value, np.abs(value))
             spectrum[l - l1, p] = value
-    # if np.abs(value) > 0.5:
-    # spectrumReal.append(value)
-    # modes.append((l, p))
+        # if np.abs(value) > 0.5:
+        # spectrumReal.append(value)
+        # modes.append((l, p))
     # print(modes)
     if plot:
         import matplotlib.pyplot as plt
@@ -207,53 +141,65 @@ plot_braids = 0
 real_field = 1
 plot_real_field = 1
 plot_real_lines = 1
-modes_cutoff = 0.01
-modes_cutoff = 0.0001
+
+rotation_on = False
+scaling_x_on = 0
+scaling_a_on = 0
+shifting_x_on = 0  # ne nado!!!
+shifting_z_on = True
+name_f = 'rotated_shifted'
+name_f = 'loop_horizontal_30_50_shift2'
 modes_cutoff = 0.03
-modes_cutoff = 0.02
+modes_cutoff = 0.0001
+modes_cutoff = 0.01
+lMax = 50
+pMax = 50
+cmapF = 'hsv'
+cmapE = 'hot'
 
-
-shift = 0.325  # 0.2
-shift = 0.0
-shift = 0.15  # 1 line each side boundary condition
-shift = 0.225   # 2 lines each side boundary condition
-# shift = 0.3  # 2 lines each side boundary condition
-
-scale = 1.0
-scale = 1.3
-line_number = 0
-line_number = 1
-line_number = 2
-# line_number = 2
 """beam parameters"""
 w = 1.3
-w = 1.2
-w = 1.15
-# w = 1.1
-
-w_real = 1.3
+w_real = 1.6  # 1.3 for 3d is set already
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-
-y_scale1 = 1 / scale
-y_scale2 = 1 / scale
-y_scale3 = 1 / scale
-C_lobe1, C_lobe2, C_lobe3 = np.pi * 0 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
-
+x_scale1 = 1
+y_scale1 = 1
+C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
+if rotation_on:
+    C_lobe1, C_lobe2, C_lobe3 = np.pi * 1 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
+shift = 0.3  # 0.2
 BETTA = 0 / 3
 ALPHA = BETTA * (2 / 3) / 1
-l1, l2, l3 = 1, 1, 1
+l1, l2, l3 = 2, -0, 0
+if shifting_x_on:
+    l1, l2, l3 = 0, -0.5, 0
 # x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 # y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
-z_shift1, z_shift2, z_shift3 = 0, 0, 0
+z_shift1, z_shift2, z_shift3 = -0, 0, 0
+if shifting_z_on:
+    z_shift1, z_shift2, z_shift3 = -0.3, 0.2, 0.3  # минус вверх
+    z_shift1, z_shift2, z_shift3 = -0.3, 0.3, 0
+    z_shift1, z_shift2, z_shift3 = -0.3, 0.0, 0.3
+    z_shift1, z_shift2, z_shift3 = -0, -0.25, 0.25
+    z_shift1, z_shift2, z_shift3 = -0.25, 0, 0.25  #
+    z_shift1, z_shift2, z_shift3 = -0.25, -0.0, 0.25  # bottom left ; rotated, top left
+    z_shift1, z_shift2, z_shift3 = -0.0, -0.28, 0.28 # плоский ; rotated, top left
+    z_shift1, z_shift2, z_shift3 = -0.0, -0.30, 0.30 # плоский ; rotated, top left
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
-res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
+x_lim_3D, y_lim_3D, z_lim_3D = (-8, 8), (-8, 8), (-1, 1)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2, 2), (-2, 2), (-1, 1)
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 50, 50, 50
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 120, 120, 120
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.2, 2.2), (-2.2, 2.2), (-0.75, 0.75)
+# x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.3, 2.3), (-2.3, 2.3), (-0.75, 0.75)
+
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 100, 100, 100
+res_x_3D, res_y_3D, res_z_3D = 120, 120, 120
+res_x_3D, res_y_3D, res_z_3D = 251, 251, 3
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -298,137 +244,56 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             phase_mask = (phase > A) & (phase < B)
             # indexes = np.where(phase_mask)
             # angle_3D[indexes] += C_lobe1
-            angle_3D[phase_mask] += C_lobe1
+            # angle_3D[phase_mask] += C_lobe1
+            # angle_3D[phase_mask] += C_lobe1
+            # angle_3D[phase_mask] += C_lobe1
+            # x_new[phase_mask], y_new[phase_mask], z_new[phase_mask] = (
+            # 	rotate_meshgrid(x_new[phase_mask], y_new[phase_mask], z_new[phase_mask],
+            # 	                np.radians(45), np.radians(00), np.radians(00))
+            # )
+            x_new[phase_mask], y_new[phase_mask], z_new[phase_mask] = (
+                rotate_meshgrid(x_new[phase_mask], y_new[phase_mask], z_new[phase_mask],
+                                np.radians(50), np.radians(0), np.radians(0))
+            )
             # x_new[phase_mask] *= x_scale
             # angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift1
             y_new[phase_mask] += y_shift1
             z_new[phase_mask] += z_shift1
-
-            # x_new[phase_mask] *= x_scale1
-            # y_new[phase_mask] *= y_scale1
-            # coords = np.dstack((x_new[phase_mask], y_new[phase_mask]))[0]
-            # axis = np.array([0, 1])
-            # x_new[phase_mask], y_new[phase_mask] = scale_along_axis(coords, axis, y_scale1)
-
-            A2, B2 = 1 / 3 * np.pi, -1 / 3 * np.pi
-            phase_mask2 = (phase < A2) & (phase >= B2)
-            angle_rad = 0
-            axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])[::-1]
-            coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale1)
-            # A2, B2 = np.pi, -np.pi
-            # phase_mask2 = (phase < A2) & (phase >= B2)
-            # point = 0
-            # coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            # print(axis * point)
-            # x_new[phase_mask2], y_new[phase_mask2] = reflect_along_axis(
-            #     coords, axis, [0, 1] * point
-            # )
-            # x_new[phase_mask] = scale_along_axis(
-            #     [x_new[phase_mask], y_new[phase_mask], z_new[phase_mask]], (1, 0, 0), x_scale1
-            # )[0]
             # a_cos_3D = np.ones(np.shape(z)) * a_cos
             # a_sin_3D = np.ones(np.shape(z)) * a_sin
             # a_cos_3D[phase_mask] *= braid_scale
             # a_sin_3D[phase_mask] *= braid_scale
             # Lobe 2
             print('Lobe 2')
-            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
             phase_mask = (phase < A) & (phase >= -np.pi * 1)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            if line_number > 0:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 1, :] += np.pi
-            if line_number > 1:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 2, :] += np.pi
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 - 3, :] += np.pi
-            # ar = -np.pi / 6
-            # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
-            # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
-            # x_new[phase_mask] = (
-            #         x_p * np.cos(ar) + y_p * np.sin(ar)
-            # )
-            # y_new[phase_mask] = (
-            #         -x_p * np.sin(ar) + y_p * np.cos(ar)
-            # )
 
-
-            # A2, B2 = np.pi, np.pi / 3
-            # phase_mask2 = (phase < A2) & (phase >= B2)
-            # angle_rad = (np.pi / 2 + np.pi / 6 -np.pi / 2)
-            # axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-            # print(axis)
-            # coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            # x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale2)
-
-
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
-            # angle_3D[:res_x_3D//2,res_y_3D//2 - 3,:] += np.pi
-            # angle_3D[:res_x_3D//2,res_y_3D//2 - 4,:] += np.pi
             # z_new[phase_mask] += z_shift2
             # Lobe 3
             print('Lobe 3')
-            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            phase_mask = (phase > B) & (phase <= np.pi * 1)
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase > B) & (phase < np.pi * 1)
             angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-            if line_number > 0:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
-            if line_number > 1:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 1, :] += np.pi
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 2, :] += np.pi
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 3, :] += np.pi
-            # ar = np.pi / 6
-            # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale3
-            # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale3
-            # x_new[phase_mask] = (
-            #         x_p * np.cos(ar) + y_p * np.sin(ar)
-            # )
-            # y_new[phase_mask] = (
-            #         -x_p * np.sin(ar) + y_p * np.cos(ar)
-            # )
-        # angle_3D[:res_x_3D//2,res_y_3D//2 + 3,:] += np.pi
-        # angle_3D[:res_x_3D//2,res_y_3D//2 + 4,:] += np.pi
         # plot_field(x_new)
         # plt.show()
         elif braids_modification == 1:
             # Lobe 2
             print('Braid 2\nLobe 2')
             # A, B = 0, 0
-            phase_mask = (phase > 0) & (phase <= np.pi * 1)
+            phase_mask = (phase >= 0) & (phase <= np.pi * 1)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
 
-            A2, B2 = np.pi, np.pi / 3
-            phase_mask2 = (phase <= A2) & (phase >= B2)
-            angle_rad = (np.pi / 2 + np.pi / 6 -np.pi / 2)
-            axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-
-            coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale2)
-
-            # angle_rad = (np.pi / 2 + np.pi / 6 -np.pi /2)
-            # axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-            # coords = np.dstack((x_new[phase_mask], y_new[phase_mask]))[0]
-            # x_new[phase_mask], y_new[phase_mask] = scale_along_axis(coords, axis, y_scale2)
-
-
-            # ar = -np.pi / 6
-            # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
-            # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
-            # x_new[phase_mask] = (
-            #         x_p * np.cos(ar) + y_p * np.sin(ar)
-            # )
-            # y_new[phase_mask] = (
-            #         -x_p * np.sin(ar) + y_p * np.cos(ar)
-            # )
             # Lobe 3
             print('Lobe 3')
             # A, B = 0, 0
@@ -438,15 +303,9 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-            A2, B2 = -np.pi / 3, -np.pi
-            phase_mask2 = (phase <= A2) & (phase >= B2)
-            angle_rad = (-np.pi / 2 - np.pi / 6 + np.pi/2)
-            axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-            coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale3)
-    # plot_field(x_new)
-    # plt.show()
-    # exit()
+        # plot_field(x_new)
+        # plt.show()
+        # exit()
 
     # else:
     #     x_new = x
@@ -553,9 +412,9 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-    # plot_field(x_new)
-    # plt.show()
-    # exit()
+        # plot_field(x_new)
+        # plt.show()
+        # exit()
 
     return (x + 1j * y) * np.exp(1j * theta) - (
             cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
@@ -566,10 +425,14 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
 
 
 def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
+    mesh_3D_rotated = rotate_meshgrid(*mesh_3D, np.radians(0), np.radians(0), np.radians(0))
+    mesh_3D_rotated_2 = rotate_meshgrid(*mesh_3D, np.radians(0), np.radians(0), np.radians(0))
+    # mesh_3D_rotated_2 =mesh_3D
     xyz_array = [
-        (mesh_3D[0], mesh_3D[1], mesh_3D[2]),
-        (mesh_3D[0], mesh_3D[1], mesh_3D[2])
+        (mesh_3D_rotated_2[0], mesh_3D_rotated_2[1], mesh_3D_rotated_2[2]),
+        (mesh_3D_rotated[0], mesh_3D_rotated[1], mesh_3D_rotated[2])
     ]
+
     # starting angle for each braid
     angle_array = np.array([0, 1. * np.pi]) + BETTA  ##0 * np.pi/3
     print(angle_array)
@@ -616,9 +479,6 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     return ans
 
 
-
-# w = 1.3
-
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
@@ -627,7 +487,6 @@ x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
 mesh_3D = np.meshgrid(x_3D, y_3D, z_3D, indexing='ij')  #
-
 mesh_2D = np.meshgrid(x_3D, y_3D, indexing='ij')  #
 phase = np.angle(mesh_3D[0] + 1j * mesh_3D[1])
 mesh_2D_xz = np.meshgrid(x_3D, z_3D, indexing='ij')  #
@@ -662,9 +521,9 @@ field_norm = dg.normalization_field(field_gauss)
 moment0 = moments['l'][0]
 values_total = 0
 y_value = 0
-w_spec = 1.0
+w_spec = 1
 width_gauss = 0.75
-width_gauss = 1.0
+width_gauss = 1
 k_0_spec = 1.6
 # field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # pl.plot_3D_density(np.abs(field_norm))
@@ -695,7 +554,7 @@ if plot_milnor_field:
 # plot_field(field_norm[:, y_ind + 2, :])
 # plt.show()
 if plot_milnor_lines:
-    _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
+    _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=True, returnDict=True)
     dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
     plt.show()
 
@@ -741,13 +600,13 @@ if real_field:
     #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
     #     functions=new_function
     # )
-    
+
     field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
     total = 0
     l_save = []
     p_save = []
     weight_save = []
-    
+
     # for l, p_array in enumerate(values):
     # 	for p, value in enumerate(p_array):
     # 		if abs(value) > 0.01 * abs(values).max():
@@ -760,24 +619,24 @@ if real_field:
     # 			                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
     # weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
-    
+
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
-            if abs(value) > modes_cutoff * abs(values).max():
+            if abs(value) > modes_cutoff * abs(values).max() and l + moment0 <= lMax and p <= pMax:
                 total += 1
                 l_save.append(l + moment0)
                 p_save.append(p)
                 weight_save.append(value)
                 # weights_important[f'{l + moment0}, {p}'] = value
                 field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
-                                                     width=1 * w_spec * w_real, k0=1, x0=0, y0=0, z0=0)
+                                                     width=w_real * w_spec, k0=1, x0=0, y0=0, z0=0)
     field_new_3D = field_new_3D / np.abs(field_new_3D).max()
     weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     print(weights_important)
 
-# scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+    scipy.io.savemat('weights_trefoil_panda_with_shift.mat', weights_important)
 if plot_real_field and real_field:
-    plot_field(field_new_3D, intensity=False)
+    plot_field(field_new_3D, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
     plt.show()
     plot_field(field_new_3D[:, y_ind, :])
     plt.show()
@@ -790,18 +649,21 @@ if plot_real_lines and real_field:
     field_new_3D_k = np.zeros((res_x_3D_k, res_y_3D_k, res_z_3D_k)).astype(np.complex128)
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
-            if abs(value) > modes_cutoff * abs(values).max():
+            if abs(value) > modes_cutoff * abs(values).max() and l + moment0 <= lMax and p <= pMax:
                 field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
-                                                       width=1 * w_spec * w_real, k0=1, x0=0, y0=0, z0=0)
+                                                       width=1.3, k0=1, x0=0, y0=0, z0=0)
     _, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
-    fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=True, size=10)
+    fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=False, size=10)
     # fig.write_html(f'trefoil_rotated_shifted.html')
+    np.save(f'trefoil_1plane'
+            f'_resX{res_x_3D_k}_resZ{res_z_3D_k}_limX{x_lim_3D_k[1]}_limZ{z_lim_3D_k[1]}', dots_init)
 
+    fig.show()
+    exit()
     fig.update_layout(
         scene=dict(
             camera=dict(
-                eye=dict(x=-2.3, y=-2.3, z=2.3)  # Adjust x, y, and z to set the default angle of view
+                eye=dict(x=2.3, y=-2.3, z=2.3)  # Adjust x, y, and z to set the default angle of view
             )
         )
     )
@@ -813,6 +675,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'trefoil_{name_f}_xz.html')
     fig.update_layout(
         scene=dict(
@@ -822,6 +685,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'trefoil_{name_f}_yz.html')
     # fig.update_layout(
     #     scene=dict(
@@ -839,6 +703,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'trefoil_{name_f}_xy.html')
     # fig.write_html('hopf_rotated_shifted.html')
     plt.show()

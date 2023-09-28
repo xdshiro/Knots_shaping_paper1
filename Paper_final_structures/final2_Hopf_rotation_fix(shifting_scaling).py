@@ -13,6 +13,7 @@ import matplotlib as mpl
 import scipy.io
 
 
+
 def gauss_z(x, y, z, width):
     if width is None:
         return 1
@@ -138,8 +139,8 @@ def v(x, y, z):
 
 
 """used modules"""
-rotation_on = 0  #
-shifting_z_on = 0  #
+rotation_on = False  #
+shifting_z_on = False  #
 
 scaling_x_on = 0
 scaling_a_on = 0
@@ -166,6 +167,7 @@ plot_real_field = 1
 plot_real_lines = 1
 
 modes_cutoff = 0.03
+modes_cutoff = 0.01
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
@@ -197,9 +199,13 @@ y_shift2 = -shift * np.sin(C_lobe2) * l2
 
 z_shift1 = 0
 z_shift2 = 0
+name_extention = '30'
+name_extention = 'no_dots'
 if shifting_z_on:
     z_shift1 = - 0.25
     z_shift2 = 0.25
+    z_shift1 = - 0.30
+    z_shift2 = 0.30
 # z_shift1 = - 0.3
 # z_shift2 = 0.3
 # z_shift2 = - 0
@@ -530,7 +536,7 @@ if real_field:
 
     ##################################################################################################
     values = cbs.LG_spectrum(
-        field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=False, width=w * w_spec, k0=1,
+        field_norm[:, :, res_z_3D // 2], **moments, mesh=mesh_2D, plot=True, width=w * w_spec, k0=1,
     )
     # values = LG_spectrum(
     #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
@@ -545,7 +551,8 @@ if real_field:
 
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
-            if abs(value) > modes_cutoff * abs(values).max():
+            if abs(value) > modes_cutoff * abs(values).max()  and l + moment0<=2 and p<=2:
+                print(l, p)
                 total += 1
                 l_save.append(l + moment0)
                 p_save.append(p)
@@ -559,7 +566,7 @@ if real_field:
     weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     print(weights_important)
 
-# scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+scipy.io.savemat('weights_hopf_rotated_shifted_new.mat', weights_important)
 if plot_real_field and real_field:
     plot_field(field_new_3D, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
     plt.show()
@@ -574,7 +581,7 @@ if plot_real_lines and real_field:
     field_new_3D_k = np.zeros((res_x_3D_k, res_y_3D_k, res_z_3D_k)).astype(np.complex128)
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
-            if abs(value) > 0.03 * abs(values).max():
+            if abs(value) > modes_cutoff * abs(values).max()   and l + moment0<=3 and p<=3:
                 field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
                                                        width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
 
@@ -605,8 +612,9 @@ if plot_real_lines and real_field:
     dots_init = np.array([[dot[0], res_y_3D_k - dot[1], dot[2]] for dot in dots_init])
     path_ind, distances = find_path(dots_init, 0)
     cut = -1  # 2 other
+    cut = -2  # normal 30
     if not rotation_on and not shifting_z_on:
-        cut = -4  # normal
+        cut = -4  # normal 25 27
     dots_init = dots_init[path_ind][:cut]
 
     sorted_indices = np.argsort(distances[:cut])
@@ -625,11 +633,27 @@ if plot_real_lines and real_field:
         name_f = 'rotated_shifted'
         dots1 = dots_init[:two_largest_indices.min()]  # rotated  + shifted
         dots2 = dots_init[two_largest_indices.min()+1:two_largest_indices.max()]  # rotated + shifted
-
+    name_f += name_extention
     dotSize = 12
+    dots1_z0 = []
+    dots2_z0 = []
+    for dot in dots1:
+        if dot[2] == res_z_3D_k // 2:
+            dots1_z0.append(dot)
+    if len(dots1_z0) > 2:
+        dots1_z0 = [dots1_z0[0], dots1_z0[-1]]
+    dots1_z0 = np.array(dots1_z0)
+    for dot in dots2:
+        if dot[2] == res_z_3D_k // 2:
+            dots2_z0.append(dot)
+    if len(dots2_z0) > 2:
+        dots2_z0 = [dots2_z0[0], dots2_z0[-1]]
+    dots2_z0 = np.array(dots2_z0)
     fig = dp.plotDots_Hopf(dots1, boundary_3D_k, color='red', show=False, size=dotSize)
+    # dp.plotDots_Hopf(dots1_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
     # fig = plot_line_colored(dots1, color=([0, '#660000'], [1, '#ff0000']))
     dp.plotDots_Hopf(dots2, boundary_3D_k, color='royalblue', show=False, size=dotSize, fig=fig)
+    # dp.plotDots_Hopf(dots2_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
     # plot_line_colored(dots2, fig=fig, color=([0, '#ff0000'], [1, '#660000']))
     fig.update_layout(
         scene=dict(
@@ -646,6 +670,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'hopf_{name_f}_xz.html')
     fig.update_layout(
         scene=dict(
@@ -655,6 +680,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'hopf_{name_f}_yz.html')
     # fig.update_layout(
     #     scene=dict(
@@ -672,6 +698,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'hopf_{name_f}_xy.html')
     # fig.write_html('hopf_rotated_shifted.html')
     plt.show()

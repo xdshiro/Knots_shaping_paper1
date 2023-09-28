@@ -211,27 +211,35 @@ modes_cutoff = 0.01
 modes_cutoff = 0.0001
 modes_cutoff = 0.03
 modes_cutoff = 0.02
+modes_cutoff = 0.01
+modes_cutoff = 0.01
 
 
 shift = 0.325  # 0.2
 shift = 0.0
-shift = 0.15  # 1 line each side boundary condition
-shift = 0.225   # 2 lines each side boundary condition
-# shift = 0.3  # 2 lines each side boundary condition
-
-scale = 1.0
-scale = 1.3
+# shift = 0.15  # 1 line each side boundary condition
+# shift = 0.225   # 2 lines each side boundary condition
+shift = 0.3  # 2 lines each side boundary condition
+# shift = 0.35  # 2 lines each side boundary condition
+# shift = 0
+scale = 1.4
+# scale = 1.3
+# scale = 1.0
 line_number = 0
-line_number = 1
-line_number = 2
+# line_number = 1
 # line_number = 2
+# line_number = 90
+line_number = 90
 """beam parameters"""
 w = 1.3
-w = 1.2
-w = 1.15
-# w = 1.1
-
-w_real = 1.3
+# w = 1.2
+# w = 1.15
+w = 1.1
+# w = 1.05
+name_f = f'w={w}_shift={shift}_coff={modes_cutoff}_scale10'
+cmapF = 'hsv'
+cmapE = 'hot'
+w_real = 1.3  # 1.3 for 3d 1.6 for 2d.
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
@@ -250,10 +258,17 @@ l1, l2, l3 = 1, 1, 1
 z_shift1, z_shift2, z_shift3 = 0, 0, 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
-res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
+# x_lim_3D, y_lim_3D, z_lim_3D = (-8, 8), (-8, 8), (-1, 1)
+# res_x_3D_k, res_y_3D_k, res_z_3D_k = 120, 120, 120
+# res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 80, 80, 80
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.2, 2.2), (-2.2, 2.2), (-0.75, 0.75)
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.4, 2.4), (-2.4, 2.4), (-0.75, 0.75)  # scale
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.5, 2.5), (-2.5, 2.5), (-0.75, 0.75)  # scale
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
 res_x_3D, res_y_3D, res_z_3D = 100, 100, 100
+res_x_3D, res_y_3D, res_z_3D = 251, 251, 3
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -344,6 +359,16 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
                 angle_3D[:res_x_3D // 2, res_y_3D // 2 - 1, :] += np.pi
             if line_number > 1:
                 angle_3D[:res_x_3D // 2, res_y_3D // 2 - 2, :] += np.pi
+            if line_number > 2:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 3, :] += np.pi
+            if line_number > 3:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 4, :] += np.pi
+            if line_number > 4:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 5, :] += np.pi
+            # if line_number > 5:
+            #     angle_3D[:res_x_3D // 2, res_y_3D // 2 - 6, :] += np.pi
+            # if line_number > 5:
+            #     angle_3D[:res_x_3D // 2, res_y_3D // 2 - 6, :] += np.pi
             # angle_3D[:res_x_3D // 2, res_y_3D // 2 - 3, :] += np.pi
             # ar = -np.pi / 6
             # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
@@ -381,6 +406,14 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
                 angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
             if line_number > 1:
                 angle_3D[:res_x_3D // 2, res_y_3D // 2 + 1, :] += np.pi
+            if line_number > 2:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 2, :] += np.pi
+            if line_number > 3:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 3, :] += np.pi
+            if line_number > 4:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 4, :] += np.pi
+            if line_number > 5:
+                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 5, :] += np.pi
             # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 2, :] += np.pi
             # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 3, :] += np.pi
             # ar = np.pi / 6
@@ -665,7 +698,7 @@ y_value = 0
 w_spec = 1.0
 width_gauss = 0.75
 width_gauss = 1.0
-k_0_spec = 1.6
+# k_0_spec = 1.6
 # field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # pl.plot_3D_density(np.abs(field_norm))
 # plt.show()
@@ -775,12 +808,13 @@ if real_field:
     weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     print(weights_important)
 
-# scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+    # scipy.io.savemat('weights_trefoil_moved_to_center_14_scaling.mat', weights_important)
 if plot_real_field and real_field:
-    plot_field(field_new_3D, intensity=False)
+    plot_field(field_new_3D, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
+
     plt.show()
-    plot_field(field_new_3D[:, y_ind, :])
-    plt.show()
+    # plot_field(field_new_3D[:, y_ind, :])
+    # plt.show()
 
 if plot_real_lines and real_field:
     x_3D_k = np.linspace(*x_lim_3D_k, res_x_3D_k)
@@ -790,14 +824,31 @@ if plot_real_lines and real_field:
     field_new_3D_k = np.zeros((res_x_3D_k, res_y_3D_k, res_z_3D_k)).astype(np.complex128)
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
-            if abs(value) > modes_cutoff * abs(values).max():
+            if abs(value) > modes_cutoff * abs(values).max()    and l + moment0<=3 and p<=3:
                 field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
-                                                       width=1 * w_spec * w_real, k0=1, x0=0, y0=0, z0=0)
+                                                       width=w_real * w_spec, k0=1, x0=0, y0=0, z0=0)
     _, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
-    fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=True, size=10)
-    # fig.write_html(f'trefoil_rotated_shifted.html')
 
+    dots_init = np.array([[dot[0], res_y_3D_k - dot[1], dot[2]] for dot in dots_init])
+    # dots_init = np.array([[dot[0], dot[1], dot[2]] for dot in dots_init])
+    dots_z0 = []
+    for dot in dots_init:
+        if dot[2] == res_z_3D_k // 2:
+            dots_z0.append(dot)
+    # if len(dots_z0) > 2:
+    #     dots_z0 = [dots_z0[0], dots_z0[-1]]
+    dots_z0 = np.array(dots_z0)
+    dotSize = 12
+    fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=False, size=dotSize)
+    dp.plotDots_Hopf(dots_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
+
+    # fig.write_html(f'trefoil_rotated_shifted.html')
+    # np.save(f'trefoil_fixed_scaled14'
+    #         f'_resX{res_x_3D_k}_resZ{res_z_3D_k}_limX{x_lim_3D_k[1]}_limZ{z_lim_3D_k[1]}', dots_init)
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+
+    fig.show()
+    exit()
     fig.update_layout(
         scene=dict(
             camera=dict(
@@ -805,7 +856,7 @@ if plot_real_lines and real_field:
             )
         )
     )
-    fig.write_html(f'trefoil_{name_f}_t.html')
+    fig.write_html(f'trefoil_scaling_{name_f}_t.html')
     fig.update_layout(
         scene=dict(
             camera=dict(
@@ -813,7 +864,8 @@ if plot_real_lines and real_field:
             )
         )
     )
-    fig.write_html(f'trefoil_{name_f}_xz.html')
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+    fig.write_html(f'trefoil_scaling_{name_f}_xz.html')
     fig.update_layout(
         scene=dict(
             camera=dict(
@@ -822,7 +874,9 @@ if plot_real_lines and real_field:
             )
         )
     )
-    fig.write_html(f'trefoil_{name_f}_yz.html')
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+
+    fig.write_html(f'trefoil_scaling_{name_f}_yz.html')
     # fig.update_layout(
     #     scene=dict(
     #         camera=dict(
@@ -839,8 +893,6 @@ if plot_real_lines and real_field:
             )
         )
     )
-    fig.write_html(f'trefoil_{name_f}_xy.html')
-    # fig.write_html('hopf_rotated_shifted.html')
-    plt.show()
-    plt.show()
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+    fig.write_html(f'trefoil_scaling_{name_f}_xy.html')
 ###################################################################

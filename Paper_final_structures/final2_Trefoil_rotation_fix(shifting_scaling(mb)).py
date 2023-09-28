@@ -9,73 +9,6 @@ import math
 import scipy.io
 
 
-# def scale_along_axis(mesh, axis, s):
-#     # Normalize the axis vector
-#     axis = np.array(axis) / np.linalg.norm(axis)
-#
-#     # Reshape the axis to (3, 1, 1, 1) so it can be broadcasted properly
-#     axis = axis[:, np.newaxis, np.newaxis, np.newaxis]
-#
-#     # Compute the dot product of each point in the mesh with the axis
-#     dot_product = np.sum(mesh * axis, axis=0)
-#
-#     # Project each point onto the axis
-#     proj = dot_product * axis
-#
-#     # Compute the component of each point orthogonal to the axis
-#     orth = mesh - proj
-#
-#     # Scale the projection
-#     proj_scaled = s * proj
-#
-#     # Compute the new points
-#     new_mesh = proj_scaled + orth
-#
-#     return new_mesh
-
-
-def scale_along_axis(xy, axis, scale):
-    # Normalize the axis vector
-    axis = axis / np.linalg.norm(axis)
-
-    # Project all points onto the axis vector
-    proj = np.dot(xy, axis)
-
-    # Calculate the vector component that is orthogonal to the axis
-    ortho = xy - np.outer(proj, axis)
-
-    # Scale the projections
-    proj_scaled = proj * scale
-
-    # Calculate the final points
-    xy_final = np.outer(proj_scaled, axis) + ortho
-
-    return xy_final[:, 0], xy_final[:, 1]
-
-def reflect_along_axis(xy, axis, reflection_point):
-    # Normalize the axis vector
-    axis = axis / np.linalg.norm(axis)
-
-    # Translate points such that reflection point is at origin
-    xy_translated = xy - reflection_point
-
-    # Project all points onto the axis vector
-    proj = np.dot(xy_translated, axis)
-
-    # Calculate the vector component that is orthogonal to the axis
-    ortho = xy_translated - np.outer(proj, axis)
-
-    # Reflect the projections (change their sign)
-    proj_reflected = -proj
-
-    # Calculate the new points
-    xy_final = np.outer(proj_reflected, axis) + ortho
-
-    # Translate points back
-    xy_final += reflection_point
-
-    return xy_final[:, 0], xy_final[:, 1]
-
 def gauss_z(x, y, z, width):
     if width is None:
         return 1
@@ -174,9 +107,9 @@ def LG_spectrum(beam, l=(-3, 3), p=(0, 5), xM=(-1, 1), yM=(-1, 1), width=1., k0=
                                         functions=functions, **kwargs)
             # print(l, p, ': ', value, np.abs(value))
             spectrum[l - l1, p] = value
-    # if np.abs(value) > 0.5:
-    # spectrumReal.append(value)
-    # modes.append((l, p))
+        # if np.abs(value) > 0.5:
+        # spectrumReal.append(value)
+        # modes.append((l, p))
     # print(modes)
     if plot:
         import matplotlib.pyplot as plt
@@ -206,54 +139,77 @@ plot_milnor_lines = 0
 plot_braids = 0
 real_field = 1
 plot_real_field = 1
-plot_real_lines = 1
-modes_cutoff = 0.01
-modes_cutoff = 0.0001
+plot_real_lines = 0
+
+rotation_on = True
+scaling_x_on = 0
+scaling_a_on = 0
+shifting_x_on = 0  # ne nado!!!
+shifting_z_on = True
+name_f = 'mode'
+name_f = 'dots'
 modes_cutoff = 0.03
-modes_cutoff = 0.02
+modes_cutoff = 0.0001
+modes_cutoff = 0.005
+modes_cutoff = 0.01
+cmapF = 'hsv'
+cmapE = 'hot'
 
+z_shift_plane_coefficient = 0
 
-shift = 0.325  # 0.2
-shift = 0.0
-shift = 0.15  # 1 line each side boundary condition
-shift = 0.225   # 2 lines each side boundary condition
-# shift = 0.3  # 2 lines each side boundary condition
-
-scale = 1.0
-scale = 1.3
-line_number = 0
-line_number = 1
-line_number = 2
-# line_number = 2
 """beam parameters"""
 w = 1.3
-w = 1.2
-w = 1.15
-# w = 1.1
+w_real = 1.6  # 1.3 is set for 3d
 
-w_real = 1.3
 
 # A, B, C = -1 * np.pi,  1 * np.pi, 0.25 * np.pi
 # A, B, C = 0 - 0.0 * np.pi,  0 + 0.1 * np.pi, 0.5 * np.pi
 # C_lobe1, C_lobe2, C_lobe3 = 0.25 * np.pi, 0.0 * np.pi, 0.0 * np.pi
-
-y_scale1 = 1 / scale
-y_scale2 = 1 / scale
-y_scale3 = 1 / scale
-C_lobe1, C_lobe2, C_lobe3 = np.pi * 0 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
-
+x_scale1 = 1
+y_scale1 = 1
+C_lobe1, C_lobe2, C_lobe3 = 0.0 * np.pi, 0.0 * np.pi, 0.0 * np.pi
+if rotation_on:
+    C_lobe1, C_lobe2, C_lobe3 = np.pi * 1 / 6 * 3 / 2, 0.0 * np.pi, 0.0 * np.pi
+shift = 0.3  # 0.2
 BETTA = 0 / 3
 ALPHA = BETTA * (2 / 3) / 1
-l1, l2, l3 = 1, 1, 1
+l1, l2, l3 = 0, 0, 0
+if shifting_x_on:
+    l1, l2, l3 = 0, 0, -0.5
 # x_shift1, x_shift2, x_shift3 = +shift * l1, -shift * np.sin(np.pi / 6) * l2, -shift * np.sin(np.pi / 6) * l3
 # y_shift1, y_shift2, y_shift3 = -0.0 * l1, +shift * np.cos(np.pi / 6) * l2, -shift * np.cos(np.pi / 6) * l3
-z_shift1, z_shift2, z_shift3 = 0, 0, 0
+z_shift1, z_shift2, z_shift3 = -0, 0, 0
+if shifting_z_on:
+    z_shift1, z_shift2, z_shift3 = -0.3, 0.2, 0.3  # минус вверх
+    z_shift1, z_shift2, z_shift3 = -0.3, 0.3, 0
+    z_shift1, z_shift2, z_shift3 = -0.3, 0.0, 0.3
+    z_shift1, z_shift2, z_shift3 = -0, -0.25, 0.25
+    z_shift1, z_shift2, z_shift3 = -0.25, 0, 0.25  # plus - vniz
+    z_shift1, z_shift2, z_shift3 = -0.15, 0.15, -0.15  # rotated ; bottom left, top left
+    z_shift1, z_shift2, z_shift3 = -0.30, 0.15, 0.30  # rotated ; bottom left, top left
+    name_f += f'{z_shift1},{z_shift2},{z_shift3}'
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
-res_x_3D_k, res_y_3D_k, res_z_3D_k = 70, 70, 70
+x_lim_3D, y_lim_3D, z_lim_3D = (-6.4, 6.4), (-6.4, 6.4), (-1, 1)
+x_lim_3D, y_lim_3D, z_lim_3D = (-6.4 / 1.6 * 1.3, 6.4 / 1.6 * 1.3), (-6.4 / 1.6 * 1.3, 6.4 / 1.6 * 1.3), (-1, 1)
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 50, 50, 40
+# res_x_3D_k, res_y_3D_k, res_z_3D_k = 20, 20, 20
+res_x_3D_k, res_y_3D_k, res_z_3D_k = 80, 80, 80
+# res_x_3D_k, res_y_3D_k, res_z_3D_k = 120, 120, 120
 x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-3.0, 3.0), (-3.0, 3.0), (-1.2, 1.2)
+x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.2, 2.2), (-2.2, 2.2), (-0.75, 0.75)
+# res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
+# x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-5.5, 5.5), (-5.5, 5.5), (-0.75, 0.75)
+
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
-res_x_3D, res_y_3D, res_z_3D = 100, 100, 100
+res_x_3D, res_y_3D, res_z_3D = 70, 70, 70  # 3D
+res_x_3D, res_y_3D, res_z_3D = 551, 551, 3  # 2D
+# res_x_3D, res_y_3D, res_z_3D = 251, 251, 3  # 2D
+
+# S3
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-1, 1)
+# res_x_3D, res_y_3D, res_z_3D = 551, 551, 3
+
 x_shift1 = +shift * np.cos(ALPHA) * l1
 y_shift1 = -shift * np.sin(ALPHA) * l1
 # x_shift2 = -shift * np.sin(np.pi / 6 - ALPHA) * l2
@@ -295,7 +251,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             # x_shift = 0  # 0.5
 
             # phase_mask = (phase >= A) & (phase <= B)
-            phase_mask = (phase > A) & (phase < B)
+            phase_mask = (phase >= A) & (phase <= B)
             # indexes = np.where(phase_mask)
             # angle_3D[indexes] += C_lobe1
             angle_3D[phase_mask] += C_lobe1
@@ -304,131 +260,38 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift1
             y_new[phase_mask] += y_shift1
             z_new[phase_mask] += z_shift1
-
-            # x_new[phase_mask] *= x_scale1
-            # y_new[phase_mask] *= y_scale1
-            # coords = np.dstack((x_new[phase_mask], y_new[phase_mask]))[0]
-            # axis = np.array([0, 1])
-            # x_new[phase_mask], y_new[phase_mask] = scale_along_axis(coords, axis, y_scale1)
-
-            A2, B2 = 1 / 3 * np.pi, -1 / 3 * np.pi
-            phase_mask2 = (phase < A2) & (phase >= B2)
-            angle_rad = 0
-            axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])[::-1]
-            coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale1)
-            # A2, B2 = np.pi, -np.pi
-            # phase_mask2 = (phase < A2) & (phase >= B2)
-            # point = 0
-            # coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            # print(axis * point)
-            # x_new[phase_mask2], y_new[phase_mask2] = reflect_along_axis(
-            #     coords, axis, [0, 1] * point
-            # )
-            # x_new[phase_mask] = scale_along_axis(
-            #     [x_new[phase_mask], y_new[phase_mask], z_new[phase_mask]], (1, 0, 0), x_scale1
-            # )[0]
             # a_cos_3D = np.ones(np.shape(z)) * a_cos
             # a_sin_3D = np.ones(np.shape(z)) * a_sin
             # a_cos_3D[phase_mask] *= braid_scale
             # a_sin_3D[phase_mask] *= braid_scale
             # Lobe 2
             print('Lobe 2')
-            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            phase_mask = (phase < A) & (phase >= -np.pi * 1)
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase < A) & (phase >= -np.pi)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-            if line_number > 0:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 1, :] += np.pi
-            if line_number > 1:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 - 2, :] += np.pi
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 - 3, :] += np.pi
-            # ar = -np.pi / 6
-            # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
-            # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
-            # x_new[phase_mask] = (
-            #         x_p * np.cos(ar) + y_p * np.sin(ar)
-            # )
-            # y_new[phase_mask] = (
-            #         -x_p * np.sin(ar) + y_p * np.cos(ar)
-            # )
-
-
-            # A2, B2 = np.pi, np.pi / 3
-            # phase_mask2 = (phase < A2) & (phase >= B2)
-            # angle_rad = (np.pi / 2 + np.pi / 6 -np.pi / 2)
-            # axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-            # print(axis)
-            # coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            # x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale2)
-
-
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
-            # angle_3D[:res_x_3D//2,res_y_3D//2 - 3,:] += np.pi
-            # angle_3D[:res_x_3D//2,res_y_3D//2 - 4,:] += np.pi
             # z_new[phase_mask] += z_shift2
             # Lobe 3
             print('Lobe 3')
-            # A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
-            phase_mask = (phase > B) & (phase <= np.pi * 1)
+            A, B = -2 / 3 * np.pi, 2 / 3 * np.pi
+            phase_mask = (phase > B) & (phase < np.pi)
             angle_3D[phase_mask] += C_lobe3
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-            if line_number > 0:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 0, :] += np.pi
-            if line_number > 1:
-                angle_3D[:res_x_3D // 2, res_y_3D // 2 + 1, :] += np.pi
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 2, :] += np.pi
-            # angle_3D[:res_x_3D // 2, res_y_3D // 2 + 3, :] += np.pi
-            # ar = np.pi / 6
-            # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale3
-            # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale3
-            # x_new[phase_mask] = (
-            #         x_p * np.cos(ar) + y_p * np.sin(ar)
-            # )
-            # y_new[phase_mask] = (
-            #         -x_p * np.sin(ar) + y_p * np.cos(ar)
-            # )
-        # angle_3D[:res_x_3D//2,res_y_3D//2 + 3,:] += np.pi
-        # angle_3D[:res_x_3D//2,res_y_3D//2 + 4,:] += np.pi
         # plot_field(x_new)
         # plt.show()
         elif braids_modification == 1:
             # Lobe 2
             print('Braid 2\nLobe 2')
             # A, B = 0, 0
-            phase_mask = (phase > 0) & (phase <= np.pi * 1)
+            phase_mask = (phase >= 0) & (phase <= np.pi * 1)
             angle_3D[phase_mask] += C_lobe2
             x_new[phase_mask] += x_shift2
             y_new[phase_mask] += y_shift2
             z_new[phase_mask] += z_shift2
-
-            A2, B2 = np.pi, np.pi / 3
-            phase_mask2 = (phase <= A2) & (phase >= B2)
-            angle_rad = (np.pi / 2 + np.pi / 6 -np.pi / 2)
-            axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-
-            coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale2)
-
-            # angle_rad = (np.pi / 2 + np.pi / 6 -np.pi /2)
-            # axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-            # coords = np.dstack((x_new[phase_mask], y_new[phase_mask]))[0]
-            # x_new[phase_mask], y_new[phase_mask] = scale_along_axis(coords, axis, y_scale2)
-
-
-            # ar = -np.pi / 6
-            # x_p = (x_new[phase_mask] * np.cos(ar) - y_new[phase_mask] * np.sin(ar)) * x_scale2
-            # y_p = (x_new[phase_mask] * np.sin(ar) + y_new[phase_mask] * np.cos(ar)) * y_scale2
-            # x_new[phase_mask] = (
-            #         x_p * np.cos(ar) + y_p * np.sin(ar)
-            # )
-            # y_new[phase_mask] = (
-            #         -x_p * np.sin(ar) + y_p * np.cos(ar)
-            # )
             # Lobe 3
             print('Lobe 3')
             # A, B = 0, 0
@@ -438,15 +301,9 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-            A2, B2 = -np.pi / 3, -np.pi
-            phase_mask2 = (phase <= A2) & (phase >= B2)
-            angle_rad = (-np.pi / 2 - np.pi / 6 + np.pi/2)
-            axis = np.array([np.cos(angle_rad), np.sin(angle_rad)])
-            coords = np.dstack((x_new[phase_mask2], y_new[phase_mask2]))[0]
-            x_new[phase_mask2], y_new[phase_mask2] = scale_along_axis(coords, axis, y_scale3)
-    # plot_field(x_new)
-    # plt.show()
-    # exit()
+        # plot_field(x_new)
+        # plt.show()
+        # exit()
 
     # else:
     #     x_new = x
@@ -553,9 +410,9 @@ def braid_before_trans(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1,
             x_new[phase_mask] += x_shift3
             y_new[phase_mask] += y_shift3
             z_new[phase_mask] += z_shift3
-    # plot_field(x_new)
-    # plt.show()
-    # exit()
+        # plot_field(x_new)
+        # plt.show()
+        # exit()
 
     return (x + 1j * y) * np.exp(1j * theta) - (
             cos_v(x, y, z, pow_cos) / a_cos_3D + 1j * sin_v(x, y, z, pow_sin) / a_sin_3D) * np.exp(1j * angle_3D)
@@ -616,9 +473,124 @@ def field_of_braids_separate_trefoil(mesh_3D, braid_func=braid, scale=None):
     return ans
 
 
+def plot_field_zoom(field, axes=True, titles=('Amplitude', 'Phase'), cmapE='afmhot',
+                    cmapF='jet', intensity=False,
+                    x_lim=None, y_lim=None):
+    if len(np.shape(field)) == 3:
+        field2D = field[:, :, np.shape(field)[2] // 2]
+    else:
+        field2D = field
 
-# w = 1.3
+    plt.rc('font', size=16, family='Times New Roman')  # controls default text sizes
+    plt.rc('axes', titlesize=24)  # fontsize of the axes title
+    plt.rc('axes', labelsize=24)  # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=18)  # fontsize of the tick labels
+    plt.rc('ytick', labelsize=18)  # fontsize of the tick labels
+    plt.rc('legend', fontsize=12)  # legend fontsize
+    plt.rc('figure', titlesize=122)  # fontsize of the figure title
+    cbar_size = 25  # colorbar fontsize
+    plt.subplots(1, 2, figsize=(11.5, 5))
+    plt.subplot(1, 2, 1)
+    if intensity:
+        plt.imshow(np.abs(field2D.T) ** 2, cmap=cmapE, interpolation='nearest')
+    else:
+        plt.imshow(np.abs(field2D.T), cmap=cmapE, interpolation='nearest')
+    if x_lim is not None:
+        plt.xlim(x_lim)
+    if y_lim is not None:
+        plt.ylim(y_lim)
+    cbar1 = plt.colorbar(fraction=0.04, pad=0.02)
+    cbar1.ax.tick_params(labelsize=cbar_size)
+    plt.title(titles[0])
+    if not axes:
+        plt.tick_params(top=False, bottom=False, left=False, right=False,
+                        labelleft=False, labelbottom=False)
+    plt.subplot(1, 2, 2)
+    plt.imshow(np.angle(field2D.T), cmap=cmapF, interpolation='nearest')  # , cmap='twilight', interpolation='nearest'
+    cbar2 = plt.colorbar(fraction=0.04, pad=0.02)
+    cbar2.ax.tick_params(labelsize=cbar_size)
+    plt.title(titles[1])
+    if x_lim is not None:
+        plt.xlim(x_lim)
+    if y_lim is not None:
+        plt.ylim(y_lim)
+    if not axes:
+        plt.tick_params(top=False, bottom=False, left=False, right=False,
+                        labelleft=False, labelbottom=False)
+    plt.tight_layout(pad=0.1, h_pad=0.1, w_pad=0.1)
 
+# testing
+if 0:
+    def plot_field_test(field, axes=True, titles=('Amplitude', 'Phase'), cmapE='afmhot',
+                        cmapF='jet', intensity=False,
+                        x_lim=None, y_lim=None):
+        if len(np.shape(field)) == 3:
+            field2D = field[:, :, np.shape(field)[2] // 2]
+        else:
+            field2D = field
+
+        plt.rc('font', size=16, family='Times New Roman')  # controls default text sizes
+        plt.rc('axes', titlesize=24)  # fontsize of the axes title
+        plt.rc('axes', labelsize=24)  # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=18)  # fontsize of the tick labels
+        plt.rc('ytick', labelsize=18)  # fontsize of the tick labels
+        plt.rc('legend', fontsize=12)  # legend fontsize
+        plt.rc('figure', titlesize=122)  # fontsize of the figure title
+        cbar_size = 25  # colorbar fontsize
+        plt.subplots(1, 2, figsize=(11.5, 5))
+        plt.subplot(1, 2, 1)
+        if intensity:
+            plt.imshow(np.abs(field2D.T) ** 2, cmap=cmapE, interpolation='nearest')
+        else:
+            plt.imshow(np.abs(field2D.T), cmap=cmapE, interpolation='nearest'
+                       , extent=[x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
+        if x_lim is not None:
+            plt.xlim(x_lim)
+        if y_lim is not None:
+            plt.ylim(y_lim)
+        cbar1 = plt.colorbar(fraction=0.04, pad=0.02)
+        cbar1.ax.tick_params(labelsize=cbar_size)
+        plt.title(titles[0])
+        # if not axes:
+        #     plt.tick_params(top=False, bottom=False, left=False, right=False,
+        #                     labelleft=False, labelbottom=False)
+        plt.subplot(1, 2, 2)
+        plt.imshow(np.angle(field2D.T), cmap=cmapF, interpolation='nearest'
+                   , extent=[x_lim[0], x_lim[1], y_lim[0], y_lim[1]])  # , cmap='twilight', interpolation='nearest'
+        cbar2 = plt.colorbar(fraction=0.04, pad=0.02)
+        cbar2.ax.tick_params(labelsize=cbar_size)
+        plt.title(titles[1])
+        if x_lim is not None:
+            plt.xlim(x_lim)
+        if y_lim is not None:
+            plt.ylim(y_lim)
+        # if not axes:
+        #     plt.tick_params(top=False, bottom=False, left=False, right=False,
+        #                     labelleft=False, labelbottom=False)
+        plt.tight_layout(pad=0.1, h_pad=0.1, w_pad=0.1)
+    res_x = 101
+    res_y = 101
+    res_z = 101
+
+    x_lim, y_lim, z_lim = (-6.0/1.6, 6.0/1.6), (-6.0/1.6, 6.0/1.6), (-6.0/1.6, 6.0/1.6)
+    x_lim, y_lim, z_lim = (-5.0, 5), (-5, 5), (-5, 5)
+    x_lim, y_lim, z_lim = (-5.0, 5), (-5, 5), (-5, 5)
+    x = np.linspace(*x_lim, res_x)
+    y = np.linspace(*y_lim, res_y)
+    z = np.linspace(*z_lim, res_z)
+    mesh_test = np.meshgrid(x, y, z, indexing='ij')  #
+    Field_Test = bp.LG_simple(*mesh_test, l=1, p=1, width=1, k0=1, x0=0, y0=0, z0=0)
+    # plot_field(Field_Test[:, :, res_z // 2], x_lim=x_lim, y_lim=y_lim)
+    plot_field_test(Field_Test, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE,
+                    axes=False, x_lim=x_lim,
+                    y_lim=y_lim)
+    plot_field_test(Field_Test[res_x // 2, :, :], titles=('Amplitude', 'Phase'), intensity=False, cmapF=cmapF, cmapE=cmapE,
+                    axes=False, x_lim=z_lim,
+                    y_lim=x_lim)
+    # print(assoc_laguerre(4, 1, 2))
+    # exit()
+    plt.show()
+    exit()
 # LG spectrum
 moments = {'p': (0, 9), 'l': (-7, 7)}
 """mesh parameters"""
@@ -627,7 +599,6 @@ x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
 z_3D = np.linspace(*z_lim_3D, res_z_3D)
 mesh_3D = np.meshgrid(x_3D, y_3D, z_3D, indexing='ij')  #
-
 mesh_2D = np.meshgrid(x_3D, y_3D, indexing='ij')  #
 phase = np.angle(mesh_3D[0] + 1j * mesh_3D[1])
 mesh_2D_xz = np.meshgrid(x_3D, z_3D, indexing='ij')  #
@@ -662,16 +633,28 @@ field_norm = dg.normalization_field(field_gauss)
 moment0 = moments['l'][0]
 values_total = 0
 y_value = 0
-w_spec = 1.0
+w_spec = 1
 width_gauss = 0.75
-width_gauss = 1.0
+width_gauss = 1
 k_0_spec = 1.6
 # field_norm = field_norm * gauss_z(*mesh_3D, width=width_gauss)
 # pl.plot_3D_density(np.abs(field_norm))
 # plt.show()
 if plot_milnor_field:
-    plot_field(field_norm)
+    x_lim = (res_x_3D - res_x_3D + res_x_3D / 4, res_x_3D - res_x_3D / 4)
+    y_lim = (0 + res_y_3D / 4, res_y_3D - res_y_3D / 4)
+    y_lim = (res_y_3D - res_y_3D / 4, 0 + res_y_3D / 4)
+    plot_field(field_norm / np.abs(field_norm).max(), titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE,
+               axes=False)
+    plot_field_zoom(field_norm / np.abs(field_norm).max(), titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE,
+               axes=False, x_lim=x_lim,
+                    y_lim=y_lim)
+    # np.save(f'2D_field_trefoil_milnor_rotated_{rotation_on}_shifted_{shifting_z_on}_'
+    #         f'xy_res_{res_x_3D}_xy_bord_{x_lim_3D}'
+    #         f'_w_{w}_w_real_{w_real}', field_norm[:, :, res_z_3D // 2] / np.abs(field_norm).max())
+
     plt.show()
+    # exit()
 # plot_field(field_norm[:, :, res_z_3D//2 - 10])
 # plt.show()
 # plot_field(field_norm[:, :, res_z_3D//2 - 20])
@@ -696,8 +679,11 @@ if plot_milnor_field:
 # plt.show()
 if plot_milnor_lines:
     _, dots_init = sing.get_singularities(np.angle(field_norm), axesAll=False, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D, color='blue', show=True, size=7)
-    plt.show()
+    fig = dp.plotDots(dots_init, boundary_3D, color='blue', show=False, size=7)
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+    # print('delete')
+    fig.show()
+    # plt.show()
 
 if plot_braids:
     braid = field_of_braids_separate_trefoil(mesh_3D, braid_func=braid_before_trans)
@@ -741,13 +727,13 @@ if real_field:
     #     field_norm[:, :, :], **moments, mesh=mesh_3D, plot=True, width=w * w_spec, k0=k_0_spec,
     #     functions=new_function
     # )
-    
+
     field_new_3D = np.zeros((res_x_3D, res_y_3D, res_z_3D)).astype(np.complex128)
     total = 0
     l_save = []
     p_save = []
     weight_save = []
-    
+
     # for l, p_array in enumerate(values):
     # 	for p, value in enumerate(p_array):
     # 		if abs(value) > 0.01 * abs(values).max():
@@ -760,7 +746,7 @@ if real_field:
     # 			                                     width=w * w_spec, k0=1, x0=0, y0=0, z0=0)
     # weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     # scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
-    
+
     for l, p_array in enumerate(values):
         for p, value in enumerate(p_array):
             if abs(value) > modes_cutoff * abs(values).max():
@@ -775,12 +761,22 @@ if real_field:
     weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
     print(weights_important)
 
-# scipy.io.savemat('weights_trefoil_shifted_2_w13.mat', weights_important)
+# scipy.io.savemat('weights_trefoil_rotated_shifted_new.mat', weights_important)
 if plot_real_field and real_field:
-    plot_field(field_new_3D, intensity=False)
+    x_lim = (res_x_3D - res_x_3D + res_x_3D / 4, res_x_3D - res_x_3D / 4)
+    y_lim = (0 + res_y_3D / 4, res_y_3D - res_y_3D / 4)
+    y_lim = (res_y_3D - res_y_3D / 4, 0 + res_y_3D / 4)
+    plot_field(field_new_3D, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=True)
+    np.save(f'2D_field_trefoil_rotated_{rotation_on}_shifted_{shifting_z_on}_'
+            f'xy_res_{res_x_3D}_xy_bord_{x_lim_3D}'
+            f'_w_{w}_w_real_{w_real}', field_new_3D[:, :, res_z_3D // 2])
+    # plot_field_zoom(field_new_3D, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE,
+    #                 axes=False, x_lim=x_lim,
+    #                 y_lim=y_lim)
+
     plt.show()
-    plot_field(field_new_3D[:, y_ind, :])
-    plt.show()
+# plot_field(field_new_3D[:, y_ind, :])
+# plt.show()
 
 if plot_real_lines and real_field:
     x_3D_k = np.linspace(*x_lim_3D_k, res_x_3D_k)
@@ -792,12 +788,30 @@ if plot_real_lines and real_field:
         for p, value in enumerate(p_array):
             if abs(value) > modes_cutoff * abs(values).max():
                 field_new_3D_k += value * bp.LG_simple(*mesh_3D_k, l=l + moment0, p=p,
-                                                       width=1 * w_spec * w_real, k0=1, x0=0, y0=0, z0=0)
+                                                       width=1 * w_spec * 1.3, k0=1, x0=0, y0=0, z0=0)
     _, dots_init = sing.get_singularities(np.angle(field_new_3D_k), axesAll=True, returnDict=True)
-    dp.plotDots(dots_init, boundary_3D_k, color='black', show=True, size=7)
-    fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=True, size=10)
+    np.save(f'trefoil_rotated_shifted_field_80', np.abs(field_new_3D_k))
+    exit()
+    dots_init = np.array([[dot[0], res_y_3D_k - dot[1], dot[2]] for dot in dots_init])
+    # dots_init = np.array([[dot[0], dot[1], dot[2]] for dot in dots_init])
+    dots_z0 = []
+    for dot in dots_init:
+        if dot[2] == res_z_3D_k // 2:
+            dots_z0.append(dot)
+    # if len(dots_z0) > 2:
+    #     dots_z0 = [dots_z0[0], dots_z0[-1]]
+    dots_z0 = np.array(dots_z0)
+    dotSize = 12
+    np.save(f'trefoil_rot{int(rotation_on)}_shift{int(shifting_z_on)}'
+            f'_resX{res_x_3D_k}_resZ{res_z_3D_k}_limX{x_lim_3D_k[1]}_limZ{z_lim_3D_k[1]}', dots_init)
+    exit()
+    fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=False, size=dotSize)
+    dp.plotDots_Hopf(dots_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
+
     # fig.write_html(f'trefoil_rotated_shifted.html')
 
+    fig.show()
+    exit()
     fig.update_layout(
         scene=dict(
             camera=dict(
@@ -813,6 +827,7 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'trefoil_{name_f}_xz.html')
     fig.update_layout(
         scene=dict(
@@ -822,6 +837,8 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+
     fig.write_html(f'trefoil_{name_f}_yz.html')
     # fig.update_layout(
     #     scene=dict(
@@ -839,8 +856,9 @@ if plot_real_lines and real_field:
             )
         )
     )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     fig.write_html(f'trefoil_{name_f}_xy.html')
-    # fig.write_html('hopf_rotated_shifted.html')
-    plt.show()
-    plt.show()
+# fig.write_html('hopf_rotated_shifted.html')
+# plt.show()
+# plt.show()
 ###################################################################

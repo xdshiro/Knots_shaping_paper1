@@ -25,8 +25,10 @@ def LG_simple(x, y, z=0, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0):
     x = x - x0
     y = y - y0
     z = z - z0
-    zR = k0 * width ** 2
+    zR = (k0 * width ** 2)
+    # zR = (k0 * width ** 2) / 2
 
+    #
     E = (np.sqrt(math.factorial(p) / (np.pi * math.factorial(np.abs(l) + p)))
          * fg.rho(x, y) ** np.abs(l) * np.exp(1j * l * fg.phi(x, y))
          / (width ** (np.abs(l) + 1) * (1 + 1j * z / zR) ** (np.abs(l) + 1))
@@ -34,6 +36,22 @@ def LG_simple(x, y, z=0, l=1, p=0, width=1, k0=1, x0=0, y0=0, z0=0):
          * np.exp(-fg.rho(x, y) ** 2 / (2 * width ** 2 * (1 + 1j * z / zR)))
          * laguerre_polynomial(fg.rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)), np.abs(l), p)
          )
+    # E = (np.sqrt(2 * math.factorial(p) / (np.pi * math.factorial(np.abs(l) + p)))
+    #      * (fg.rho(x, y) * np.sqrt(2)) ** np.abs(l) * np.exp(1j * l * fg.phi(x, y))
+    #      / (width ** (np.abs(l) + 1) * (1 + 1j * z / zR) ** (np.abs(l) + 1))
+    #      * ((1 - 1j * z / zR) / (1 + 1j * z / zR)) ** p
+    #      * np.exp(-fg.rho(x, y) ** 2 / (width ** 2 * (1 + 1j * z / zR)))
+    #      * laguerre_polynomial(2 * fg.rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)), np.abs(l), p)
+    #      )
+    # zR = (k0 * width ** 2) / 2
+    # E = (np.sqrt(2 * math.factorial(p) / (np.pi * math.factorial(np.abs(l) + p)))
+    #      * (fg.rho(x, y) * np.sqrt(2)) ** np.abs(l) * np.exp(-1j * l * fg.phi(x, y))
+    #      / ((width * np.sqrt(1 + z ** 2 / zR ** 2)) ** (np.abs(l) + 1))
+    #               * np.exp(-fg.rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)))
+    #      * laguerre_polynomial(2 * fg.rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)), np.abs(l), p)
+    #      * np.exp(1j * (np.abs(l) + 2 * p + 1) * np.arctan(z / zR))
+    #      * np.exp(-1j * k0 * fg.rho(x, y) ** 2 * z / (z ** 2 + zR ** 2) / 2)
+    #      )
     return E
 
 
