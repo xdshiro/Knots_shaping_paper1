@@ -8,11 +8,10 @@ x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.4, 2.4), (-2.4, 2.4), (-0.75, 0.75)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-0.75, 0.75)
 x_lim_3D, y_lim_3D, z_lim_3D = (-4*1.6, 4*1.6), (-4*1.6, 4*1.6), (-0.75, 0.75)
-# x_lim_3D, y_lim_3D, z_lim_3D = (-2*1.6, 2*1.6), (-2*1.6, 2*1.6), (-1.0, 1.0)
-# x_lim_3D_k, y_lim_3D_k, z_lim_3D_k = (-2.2*1.6, 2.2*1.6), (-2.2*1.6, 2.2*1.6), (-1.5, 1.5)
-# x_lim_3D, y_lim_3D, z_lim_3D = (-2.2*1.6, 2.2*1.6), (-2.2*1.6, 2.2*1.6), (-3, 3)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2.5*1.6, 2.5*1.6), (-2.5*1.6, 2.5*1.6), (-1.5, 1.5)
+x_lim_3D, y_lim_3D, z_lim_3D = (-2.0*1.6, 2.0*1.6), (-2.0*1.6, 2.0*1.6), (-1.5, 1.5)
 res_x_3D, res_y_3D, res_z_3D = 551, 551, 3  # 2D
-res_x_3D, res_y_3D, res_z_3D = 80, 80, 80
+res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
 # res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
@@ -124,19 +123,26 @@ if 1:
     C02 = 7.23
     C03 = -2.04
     C30 = -3.97
-    # (0.0011924249760862221 + 1.1372720865198616e-05j), (-0.002822503524696713 + 8.535015090975148e-06j), (
-    #             0.0074027513552254 + 5.475152609562589e-06j), (-0.0037869189890120283 + 8.990311302510449e-06j), (
-    #             -0.0043335243263204586 + 8.720849197446181e-07j)]}
+    C_31 = 0
+    # (0.0011924249760862221 + 1.1372720865198616e-05j),
+    # (-0.002822503524696713 + 8.535015090975148e-06j),
+    # (0.0074027513552254 + 5.475152609562589e-06j),
+    # (-0.0037869189890120283 + 8.990311302510449e-06j),
+    # (-0.0043335243263204586 + 8.720849197446181e-07j)]}
+    # -3, 1:  (-0.0008067955939880228 + 3.6079657735470645e-06j)
     # C00 = 0.0011924249760862221
     # C01 = -0.002822503524696713
     # C02 = 0.0074027513552254
     # C03 = -0.0037869189890120283
     # C30 = -0.0043335243263204586
+    # C_31 = -0.0008067955939880228
+    # C_31 = 0
     # normal
     # C00 = 1.71
     # C01 = -5.66
     # C02 = 6.38
     # C03 = -2.3
+    # C_31 = 0
     # C30 = -4.36  # * np.exp(1j * (np.pi / 2 + np.pi / 6))
     # # our
     # C00 = 1.55
@@ -144,19 +150,25 @@ if 1:
     # C02 = 8.29
     # C03 = -2.37
     # C30 = -5.36
-    width = 1.28
+    # C_31 = 0
     width = 1.6
+    # width = 1.40
+    # width = 1.35
     field = (
             C00 * bp.LG_simple(*mesh_3D, l=0, p=0, width=width) +
             C01 * bp.LG_simple(*mesh_3D, l=0, p=1, width=width) +
             C02 * bp.LG_simple(*mesh_3D, l=0, p=2, width=width) +
             C03 * bp.LG_simple(*mesh_3D, l=0, p=3, width=width) +
-            C30 * bp.LG_simple(*mesh_3D, l=3, p=0, width=width)
+            C30 * bp.LG_simple(*mesh_3D, l=3, p=0, width=width) +
+            C_31 * bp.LG_simple(*mesh_3D, l=-3, p=1, width=width)
     )
     field = field / field.max()
     # plot_field(field, axes=True)
     plot_field(field, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
     plt.show()
+    # plt.plot(np.abs(field[:, res_y_3D // 2, res_z_3D // 2]) ** 2 )
+    # plt.show()
+    # exit()
     # plt.show()
     # exit()
     # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
@@ -175,6 +187,83 @@ if 1:
 
     # np.save(file_name, np.array(dots_init))
     fig.show()
+
+# trefoil 3D optimazation shape
+if 0:
+    # # Denis
+    C00 = 1.51
+    C01 = -5.06
+    C02 = 7.23
+    C03 = -2.04
+    C30 = -3.97
+    C32 = 0
+    C_31 = 0
+    C_32 = 0
+    # {'l': [-3, -3, 0, 0, 0, 0, 3, 3], 'p': [1, 2, 0, 1, 2, 3, 0, 2],
+    # 'weight': [
+    # (-0.0007315203912620444+3.5843472008943023e-06j),
+    # (0.0001555916098171399-2.3466469999787875e-07j),
+    # (0.001415289726757006+1.9981406014287777e-05j),
+    # (-0.000972051367682569+1.4469953853460374e-05j),
+    # (0.006098989099549146+1.2459690602266102e-05j),
+    # (-0.003490783191653628+1.5415733019953514e-05j),
+    # (-0.005135700089014358+2.5060898764955174e-06j),
+    # (-0.00026487390379443106+3.352810478797989e-07j)]}
+    C00 = 0.001415289726757006
+    C01 = -0.000972051367682569
+    C02 = 0.006098989099549146
+    C03 = -0.003490783191653628
+    C30 = -0.005135700089014358
+    # C32 = -0.00026487390379443106
+    # C_31 = -0.0007315203912620444
+    # C_32 = 0.0001555916098171399
+    # normal
+    # C00 = 1.71
+    # C01 = -5.66
+    # C02 = 6.38
+    # C03 = -2.3
+    # C_31 = 0
+    # C30 = -4.36  # * np.exp(1j * (np.pi / 2 + np.pi / 6))
+
+    width = 1.28
+    width = 1.6
+    width = 1.45
+    field = (
+            C00 * bp.LG_simple(*mesh_3D, l=0, p=0, width=width) +
+            C01 * bp.LG_simple(*mesh_3D, l=0, p=1, width=width) +
+            C02 * bp.LG_simple(*mesh_3D, l=0, p=2, width=width) +
+            C03 * bp.LG_simple(*mesh_3D, l=0, p=3, width=width) +
+            C30 * bp.LG_simple(*mesh_3D, l=3, p=0, width=width) +
+            C32 * bp.LG_simple(*mesh_3D, l=3, p=2, width=width) +
+            C_31 * bp.LG_simple(*mesh_3D, l=-3, p=1, width=width) +
+            C_32 * bp.LG_simple(*mesh_3D, l=-3, p=2, width=width)
+    )
+    field = field / field.max()
+    # plot_field(field, axes=True)
+    plot_field(field, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
+    plt.show()
+    # plt.plot(np.abs(field[:, res_y_3D // 2, res_z_3D // 2]) ** 2 )
+    # plt.show()
+    # exit()
+    # plt.show()
+    # exit()
+    # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
+    #                          opacityscale='max', colorscale='Jet')
+    # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False,
+    #                          surface_count=20, resDecrease=(4, 4, 4),
+    #                             opacity=1, colorscale='Jet',
+    #                             opacityscale=[[0, 0.1], [0.15, 0.20], [1, 0.40]])
+    _, dots_init = sing.get_singularities(np.angle(field), axesAll=True, returnDict=True)
+    fig = dp.plotDots(dots_init, boundary_3D, color='red', show=False, size=12)#, fig=Fig)
+    file_name = (
+            f'trefoil_math_w={str(width).replace(".", "d")}_x={str(x_3D.max()).replace(".", "d")}' +
+            f'_resXY={res_x_3D}_resZ={res_z_3D}'
+    )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+
+    # np.save(file_name, np.array(dots_init))
+    fig.show()
+
 
 # trefoil in Milnor space
 if 0:

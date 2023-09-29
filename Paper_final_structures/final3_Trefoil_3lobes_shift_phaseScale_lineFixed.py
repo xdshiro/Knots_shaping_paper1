@@ -206,18 +206,19 @@ plot_milnor_lines = 0
 plot_braids = 0
 real_field = 1
 plot_real_field = 1
-plot_real_lines = 1
+plot_real_lines = 0
 modes_cutoff = 0.01
 modes_cutoff = 0.0001
 modes_cutoff = 0.03
 modes_cutoff = 0.02
-modes_cutoff = 0.01
-modes_cutoff = 0.12
+modes_cutoff = 0.05
+# modes_cutoff = 0.10
 
 
 shift = 0.325  # 0.2
-shift = 0.3
 shift = 0.325
+# shift = 0.325  # using for a big 1
+# shift = 0.3  # using for a big 1
 # shift = 0.15  # 1 line each side boundary condition
 # shift = 0.225   # 2 lines each side boundary condition
 # shift = 0.3  # 2 lines each side boundary condition
@@ -236,10 +237,10 @@ w = 1.3
 # w = 1.2
 # w = 1.15
 w = 1.1
-
-# w = 1.05
+w = 0.9  # for a big one
+w = 0.90
 name_f = f'w={w}_shift={shift}_coff={modes_cutoff}_scale10'
-w = 0.9
+
 cmapF = 'hsv'
 cmapE = 'hot'
 w_real = 1.6  # 1.3 for 3d 1.6 for 2d.
@@ -266,7 +267,8 @@ z_shift1, z_shift2, z_shift3 = 0, 0, 0
 x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-4*1.6, 4*1.6), (-4*1.6, 4*1.6), (-0.75, 0.75)
-# x_lim_3D, y_lim_3D, z_lim_3D = (-8, 8), (-8, 8), (-1, 1)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2.5*1.6, 2.5*1.6), (-2.5*1.6, 2.5*1.6), (-1.5, 1.5)
+
 # res_x_3D_k, res_y_3D_k, res_z_3D_k = 120, 120, 120
 # res_x_3D_k, res_y_3D_k, res_z_3D_k = 60, 60, 60
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 80, 80, 80
@@ -311,7 +313,7 @@ def braid(x, y, z, angle=0, pow_cos=1, pow_sin=1, theta=0, a_cos=1, a_sin=1,
 
     if 1:
         ANGLE = 30
-        ANGLE = 30
+        # ANGLE = 25
         alpha3_1 = ANGLE
         alpha3_2 = 0
         alpha3_3 = 120
