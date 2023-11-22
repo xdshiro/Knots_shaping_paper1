@@ -152,6 +152,8 @@ name_f = 'loop_horizontal_30_50_shift2'
 modes_cutoff = 0.03
 modes_cutoff = 0.0001
 modes_cutoff = 0.01
+###################################
+modes_cutoff = 0.01
 lMax = 50
 pMax = 50
 cmapF = 'hsv'
@@ -631,7 +633,7 @@ if real_field:
                 field_new_3D += value * bp.LG_simple(*mesh_3D, l=l + moment0, p=p,
                                                      width=w_real * w_spec, k0=1, x0=0, y0=0, z0=0)
     field_new_3D = field_new_3D / np.abs(field_new_3D).max()
-    weights_important = {'l': l_save, 'p': p_save, 'weight': weight_save}
+    weights_important = {'l': l_save, 'p': p_save, 'weight': np.round(np.real(weight_save), 5)}
     print(weights_important)
 
     scipy.io.savemat('weights_trefoil_panda_with_shift.mat', weights_important)

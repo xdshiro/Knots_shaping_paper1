@@ -274,8 +274,8 @@ def curve_3D_smooth(x, y, z, resolution=50, s=0.02, k=2, b_imp=10):
 
 
 def braids_xy(z, angle=0):
-    x = np.cos(z + angle)
-    y = np.sin(z + angle)
+    x = np.cos(z * 1.5 + angle)
+    y = np.sin(z * 1.5 + angle)
     return x, y, z
 
 

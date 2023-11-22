@@ -9,7 +9,7 @@ x_lim_3D, y_lim_3D, z_lim_3D = (-2.4, 2.4), (-2.4, 2.4), (-0.75, 0.75)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-0.75, 0.75)
 x_lim_3D, y_lim_3D, z_lim_3D = (-4*1.6, 4*1.6), (-4*1.6, 4*1.6), (-0.75, 0.75)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5*1.6, 2.5*1.6), (-2.5*1.6, 2.5*1.6), (-1.5, 1.5)
-x_lim_3D, y_lim_3D, z_lim_3D = (-2.0*1.6, 2.0*1.6), (-2.0*1.6, 2.0*1.6), (-1.5, 1.5)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2.0*1.6, 2.0*1.6), (-2.0*1.6, 2.0*1.6), (-1.5, 1.5)
 res_x_3D, res_y_3D, res_z_3D = 551, 551, 3  # 2D
 res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
 # res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
@@ -130,12 +130,12 @@ if 1:
     # (-0.0037869189890120283 + 8.990311302510449e-06j),
     # (-0.0043335243263204586 + 8.720849197446181e-07j)]}
     # -3, 1:  (-0.0008067955939880228 + 3.6079657735470645e-06j)
-    # C00 = 0.0011924249760862221
-    # C01 = -0.002822503524696713
-    # C02 = 0.0074027513552254
-    # C03 = -0.0037869189890120283
-    # C30 = -0.0043335243263204586
-    # C_31 = -0.0008067955939880228
+    C00 = 0.0011924249760862221
+    C01 = -0.002822503524696713
+    C02 = 0.0074027513552254
+    C03 = -0.0037869189890120283
+    C30 = -0.0043335243263204586
+    C_31 = -0.0008067955939880228
     # C_31 = 0
     # normal
     # C00 = 1.71
@@ -152,7 +152,7 @@ if 1:
     # C30 = -5.36
     # C_31 = 0
     width = 1.6
-    # width = 1.40
+    width = 1.40
     # width = 1.35
     field = (
             C00 * bp.LG_simple(*mesh_3D, l=0, p=0, width=width) +
@@ -164,11 +164,13 @@ if 1:
     )
     field = field / field.max()
     # plot_field(field, axes=True)
-    plot_field(field, titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
-    plt.show()
-    # plt.plot(np.abs(field[:, res_y_3D // 2, res_z_3D // 2]) ** 2 )
-    # plt.show()
-    # exit()
+    for z in [res_z_3D // 2, (res_z_3D * 5) // 8, (res_z_3D * 6) // 8, (res_z_3D * 7) // 8]:
+        plot_field(field[:, :, z], titles=('', ''), intensity=False, cmapF=cmapF, cmapE=cmapE, axes=False)
+        plt.show()
+
+        plt.plot(np.abs(field[:, res_y_3D // 2, z]) ** 2 )
+        plt.show()
+    exit()
     # plt.show()
     # exit()
     # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
