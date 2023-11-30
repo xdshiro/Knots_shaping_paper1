@@ -721,20 +721,20 @@ if trefoil_better_shift:
     dots_z0 = np.array(dots_z0)
     dp.plotDots_Hopf(dots_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
     fig.show()
-trefoil_plane = 0
-if trefoil_plane:
+
+trefoil_mine_best = 1
+if trefoil_mine_best:
     res_xy, res_z = 120, 120
-    limXY, limZ = 2.2, 0.75
-    dots_init = np.load(f'trefoil_1plane'
-                        f'_resX{res_xy}_resZ{res_z}_limX{limXY}_limZ{limZ}.npy')
+    limXY, limZ = 2.2 * 1.6, 1.5
+    dots_init = np.load(f'trefoil_mine_best_w=1d4_x=3d5200000000000005_resXY=120_resZ=120.npy')
 
     N_dots = np.shape(dots_init)[0]
-    N_roll = -150
-    N_segment1 = N_dots // 3 - 111  # red
-    N_segment2 = N_dots // 3 + 20  # blue
+    N_roll = -121
+    N_segment1 = N_dots // 3 + 6  # red
+    N_segment2 = N_dots // 3 - 32  # blue
     # N_segment3 = N_dots - N_segment1 - N_segment2
     path_ind_unrolled, distances_unrolled = find_path(dots_init, 0)
-    sorted_indices = np.argsort(distances_unrolled[:-4])
+    sorted_indices = np.argsort(distances_unrolled[:-16])
     largest_index = sorted_indices[-1]
     path_ind_clean = path_ind_unrolled[:largest_index]
     distances_clean = distances_unrolled[:largest_index]
@@ -757,9 +757,10 @@ if trefoil_plane:
         if dot[2] == res_z // 2:
             dots_z0.append(dot)
     dots_z0 = np.array(dots_z0)
-    dots_z0_clean = np.array([
-        [35, 114, 60], [35, 6, 60], [58, 36, 60], [58, 83, 60], [72, 62, 60], [103, 62, 60]
-    ])
+    dots_z0_clean = np.array(dots_z0)
+    # dots_z0_clean = np.array([
+    #     [35, 114, 60], [35, 6, 60], [58, 36, 60], [58, 83, 60], [72, 62, 60], [103, 62, 60]
+    # ])
     # for dot in dots_z0:
     #     if dot in np.array([
     #             [35, 114, 60], [35, 6, 60], [58, 36, 60], [58, 83, 60], [72, 62, 60], [103, 62, 60]
@@ -767,6 +768,73 @@ if trefoil_plane:
     #         dots_z0_clean.append(dot)
 
     dp.plotDots_Hopf(dots_z0_clean, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
+    # dp.plotDots_Hopf(dots_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
+    fig.update_layout(
+        scene=dict(
+            camera=dict(
+                eye=dict(x=0, y=0, z=4),  # Adjust x, y, and z to set the default angle of view
+                up=dict(x=0, y=1, z=0)
+            )
+        )
+    )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
+    fig.show()
+
+trefoil_Dennis = 1
+if trefoil_Dennis:
+    res_xy, res_z = 120, 120
+    limXY, limZ = 2.2 * 1.6, 1.5
+    dots_init = np.load(f'trefoil_Dennis_w=1d6_x=3d5200000000000005_resXY=120_resZ=120.npy')
+
+    N_dots = np.shape(dots_init)[0]
+    N_roll = -120
+    N_segment1 = N_dots // 3 + 1  # red
+    N_segment2 = N_dots // 3 - 35  # blue
+    # N_segment3 = N_dots - N_segment1 - N_segment2
+    path_ind_unrolled, distances_unrolled = find_path(dots_init, 0)
+    sorted_indices = np.argsort(distances_unrolled[:-16])
+    largest_index = sorted_indices[-1]
+    path_ind_clean = path_ind_unrolled[:largest_index]
+    distances_clean = distances_unrolled[:largest_index]
+    path_ind = np.roll(path_ind_clean, shift=N_roll)
+    distances = np.roll(distances_clean, shift=N_roll)
+    # avg_distance = np.average(distances)
+
+    N = np.shape(path_ind)[0]
+    dots_init = dots_init[path_ind]  # [:]
+    dots1 = dots_init[0:N_segment1]
+    dots2 = dots_init[N_segment1:N_segment1 + N_segment2]
+    dots3 = dots_init[N_segment1 + N_segment2:]
+    boundary_3D_k = [[0, 0, 0], [res_xy, res_xy, res_z]]
+    # fig = dp.plotDots_Hopf(dots_init, boundary_3D_k, color='red', show=False, size=dotSize)
+    fig = dp.plotDots_Hopf(dots1, boundary_3D_k, color='red', show=False, size=dotSize)
+    dp.plotDots_Hopf(dots2, boundary_3D_k, color='royalblue', show=False, size=dotSize, fig=fig)
+    dp.plotDots_Hopf(dots3, boundary_3D_k, color='green', show=False, size=dotSize, fig=fig)
+    dots_z0 = []
+    for dot in dots_init:
+        if dot[2] == res_z // 2:
+            dots_z0.append(dot)
+    dots_z0 = np.array(dots_z0)
+    dots_z0_clean = np.array(dots_z0)
+    # dots_z0_clean = np.array([
+    #     [35, 114, 60], [35, 6, 60], [58, 36, 60], [58, 83, 60], [72, 62, 60], [103, 62, 60]
+    # ])
+    # for dot in dots_z0:
+    #     if dot in np.array([
+    #             [35, 114, 60], [35, 6, 60], [58, 36, 60], [58, 83, 60], [72, 62, 60], [103, 62, 60]
+    #             ]):
+    #         dots_z0_clean.append(dot)
+
+    dp.plotDots_Hopf(dots_z0_clean, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
+    fig.update_layout(
+        scene=dict(
+            camera=dict(
+                eye=dict(x=0, y=0, z=4),  # Adjust x, y, and z to set the default angle of view
+                up=dict(x=0, y=1, z=0)
+            )
+        )
+    )
+    fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
     # dp.plotDots_Hopf(dots_z0, boundary_3D_k, color='black', show=False, size=dotSize * 1.75, fig=fig)
     fig.show()
 exit()
