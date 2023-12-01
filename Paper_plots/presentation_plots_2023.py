@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from functions_based import *
 import my_functions.beams_and_pulses as bp
 import my_functions.plotings as pl
@@ -8,11 +10,11 @@ x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.4, 2.4), (-2.4, 2.4), (-0.75, 0.75)
 x_lim_3D, y_lim_3D, z_lim_3D = (-2.5, 2.5), (-2.5, 2.5), (-0.75, 0.75)
 x_lim_3D, y_lim_3D, z_lim_3D = (-4*1.6, 4*1.6), (-4*1.6, 4*1.6), (-0.75, 0.75)
-x_lim_3D, y_lim_3D, z_lim_3D = (-2.5*1.6, 2.5*1.6), (-2.5*1.6, 2.5*1.6), (-1.5, 1.5)
-x_lim_3D, y_lim_3D, z_lim_3D = (-2.2*1.6, 2.2*1.6), (-2.2*1.6, 2.2*1.6), (-1.5, 1.5)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2.2*1.6, 2.2*1.6), (-2.2*1.6, 2.2*1.6), (-1.5, 1.5)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-2.5*1.6, 2.5*1.6), (-2.5*1.6, 2.5*1.6), (-1.5, 1.5)
 # x_lim_3D, y_lim_3D, z_lim_3D = (-2.0*1.6, 2.0*1.6), (-2.0*1.6, 2.0*1.6), (-1.5, 1.5)
 res_x_3D, res_y_3D, res_z_3D = 551, 551, 3  # 2D
-res_x_3D, res_y_3D, res_z_3D = 120, 120, 120
+# res_x_3D, res_y_3D, res_z_3D = 120, 120, 120
 # res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
 x_3D = np.linspace(*x_lim_3D, res_x_3D)
 y_3D = np.linspace(*y_lim_3D, res_y_3D)
@@ -116,6 +118,45 @@ if 0:
     dp.plotDots(dots_init, boundary_3D, color='black', show=True, size=10, fig=Fig)
     plt.show()
 
+
+# A=sqrt(2*factorial(P)/(pi*factorial(P+abs(L))));        % Amplitude of the LG beam with normalized consideration.
+# Wz=w0*sqrt(1+(z/zR)^2);                                 % Beam waist as a function of z.
+# t = (X.^2 + Y.^2)/(Wz^2);                               % The term consiting (r/wz)^2.
+# Phi = L.*atan2(Y,X);                                    % The term consiting l*phi.
+# Term1 =((sqrt(2)*sqrt(X.^2 + Y.^2)/Wz)).^L;             % The term consisting (sqrt(2)*r/wz)^L.
+# Term2 =laguerreL(P,L,2.*t);                             % The term consisting Generalized Laguerre Polynomials.
+# Term3 = exp(-t);                                        % The term consiting exp[-(r/wz)^2].
+# Term4 = exp(-1i*Phi);                                   % The term consisting OAM.
+# Term5=exp(-1i*k*z.*(X.^2 + Y.^2)/(2*(z^2+zR^2))); #
+# Term6=exp(1i*(2*P+L+1)*atan2(z,zR));
+# ELG = A.*(w0/Wz).*Term1.*Term2.*Term3.*Term4.*Term5.*Term6;
+# Hooman
+if 0:
+    x_lim_3D, y_lim_3D, z_lim_3D = (-5e-4, 5e-4), (-5e-4, 5e-4), (-1e-3, 1e-3)
+    # x_lim_3D, y_lim_3D, z_lim_3D = (-2.5*1.6, 2.5*1.6), (-2.5*1.6, 2.5*1.6), (-1.5, 1.5)
+    # x_lim_3D, y_lim_3D, z_lim_3D = (-2.0*1.6, 2.0*1.6), (-2.0*1.6, 2.0*1.6), (-1.5, 1.5)
+    res_x_3D, res_y_3D, res_z_3D = 551, 551, 3  # 2D
+    # res_x_3D, res_y_3D, res_z_3D = 111, 111, 111
+    # res_x_3D, res_y_3D, res_z_3D = 51, 51, 51
+    x_3D = np.linspace(*x_lim_3D, res_x_3D)
+    y_3D = np.linspace(*y_lim_3D, res_y_3D)
+    z_3D = np.linspace(*z_lim_3D, res_z_3D)
+    mesh_2D = np.meshgrid(x_3D, y_3D, indexing='ij')  #
+    mesh_3D = np.meshgrid(x_3D, y_3D, z_3D, indexing='ij')  #
+    width = 1.5e-4 / np.sqrt(2)
+    for l, p in [[2, 4]]:
+        field = bp.LG_simple(*mesh_3D, l=l, p=p, width=width, k0=2 * np.pi * 1e6)[:, :, 1]
+        print(np.sum(np.abs(field)**2 * (x_3D[1] - x_3D[0]) * (y_3D[1] - y_3D[0])))
+        max_A = np.abs(field).max()
+        max_i = (np.abs(field)**2).max()
+        plt.imshow(np.abs(field) ** 2, cmap='jet')
+        plt.colorbar()
+        plt.show()
+        # plt.plot(np.abs(field[:, res_y_3D // 2, 1]) ** 2)
+        # plt.show()
+        print(f'l={l}, p={p}: amplitude: {max_A}, intensity: {max_i}')
+        # break
+    exit()
 # trefoil 3D
 if 1:
     # # Denis
@@ -132,13 +173,13 @@ if 1:
     # (-0.0043335243263204586 + 8.720849197446181e-07j)]}
     # -3, 1:  (-0.0008067955939880228 + 3.6079657735470645e-06j)
     # mine best experiment
-    # C00 = 0.0011924249760862221
-    # C01 = -0.002822503524696713
-    # C02 = 0.0074027513552254
-    # C03 = -0.0037869189890120283
-    # C30 = -0.0043335243263204586
-    # C_31 = -0.0008067955939880228
-    C_31 = 0
+    C00 = 0.0011924249760862221
+    C01 = -0.002822503524696713
+    C02 = 0.0074027513552254
+    C03 = -0.0037869189890120283
+    C30 = -0.0043335243263204586
+    C_31 = -0.0008067955939880228
+    # C_31 = 0
     # normal
     # C00 = 1.71
     # C01 = -5.66
@@ -155,7 +196,7 @@ if 1:
     # C_31 = 0
     width = 1.6
     # width = 1.6
-    # width = 1.4
+    width = 1.4
     field = (
             C00 * bp.LG_simple(*mesh_3D, l=0, p=0, width=width) +
             C01 * bp.LG_simple(*mesh_3D, l=0, p=1, width=width) +
@@ -183,7 +224,7 @@ if 1:
         exit()
     # exit()
     # exit()
-    # exit()
+    # exit() 21.6 0.49
     # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False, opacity=0.15,
     #                          opacityscale='max', colorscale='Jet')
     # Fig = pl.plot_3D_density(np.abs(field), mesh=mesh_3D_res, show=False,
@@ -193,7 +234,7 @@ if 1:
     _, dots_init = sing.get_singularities(np.angle(field), axesAll=True, returnDict=True)
     fig = dp.plotDots(dots_init, boundary_3D, color='red', show=False, size=12)#, fig=Fig)
     file_name = (
-            f'trefoil_mine_best_w={str(width).replace(".", "d")}_x={str(x_3D.max()).replace(".", "d")}' +
+            f'trefoil_mine_best_6_w={str(width).replace(".", "d")}_x={str(x_3D.max()).replace(".", "d")}' +
             f'_resXY={res_x_3D}_resZ={res_z_3D}'
     )
     fig.update_layout(scene=dict(camera=dict(projection=dict(type='orthographic'))))
