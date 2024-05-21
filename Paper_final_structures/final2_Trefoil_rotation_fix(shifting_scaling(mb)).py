@@ -145,7 +145,7 @@ rotation_on = True
 scaling_x_on = 0
 scaling_a_on = 0
 shifting_x_on = 0  # ne nado!!!
-shifting_z_on = True
+shifting_z_on = False
 name_f = 'mode'
 name_f = 'dots'
 modes_cutoff = 0.03
@@ -192,6 +192,9 @@ x_lim_3D, y_lim_3D, z_lim_3D = (-5.5, 5.5), (-5.5, 5.5), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6, 6), (-6, 6), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6.4, 6.4), (-6.4, 6.4), (-1, 1)
 x_lim_3D, y_lim_3D, z_lim_3D = (-6.4 / 1.6 * 1.3, 6.4 / 1.6 * 1.3), (-6.4 / 1.6 * 1.3, 6.4 / 1.6 * 1.3), (-1, 1)
+# x_lim_3D, y_lim_3D, z_lim_3D = (-6.4 / 1.6 * 1.6, 6.4 / 1.6 * 1.6), (-6.4 / 1.6 * 1.6, 6.4 / 1.6 * 1.3), (-1, 1)
+
+# x_lim_3D, y_lim_3D, z_lim_3D = (-6.4 * 1.9, 6.4 * 1.9), (-6.4 * 1.9, 6.4 * 1.9), (-1, 1)
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 50, 50, 40
 # res_x_3D_k, res_y_3D_k, res_z_3D_k = 20, 20, 20
 res_x_3D_k, res_y_3D_k, res_z_3D_k = 80, 80, 80
@@ -592,7 +595,7 @@ if 0:
     plt.show()
     exit()
 # LG spectrum
-moments = {'p': (0, 9), 'l': (-7, 7)}
+moments = {'p': (0, 5), 'l': (-5, 5)}
 """mesh parameters"""
 
 x_3D = np.linspace(*x_lim_3D, res_x_3D)

@@ -147,6 +147,7 @@ cmapE = 'hot'
 alpha_size = 5
 rotation_angle = 45 - np.degrees(np.arcsin(1 / alpha_size / np.sqrt(2)))
 rotation_angle = (45 - np.degrees(np.arcsin(1 / alpha_size / np.sqrt(2))))
+
 # rotation_angle = (40)
 # rotation_angle = (35)
 # rotation_angle = 0
