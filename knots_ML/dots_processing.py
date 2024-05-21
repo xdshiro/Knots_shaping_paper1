@@ -90,11 +90,12 @@ def plotDots_Hopf(dots, dots_bound=None, show=True, color='black', size=15, widt
         dots_bound = dots
     if fig is None:
         fig = pl.plot_3D_dots_go(dots, marker={'size': size, 'color': color,
-                                               'line': dict(width=width, color=colorLine)})
+                                               'line': dict(width=width, color=colorLine)}, **kwargs)
     else:
         pl.plot_3D_dots_go(dots, fig=fig, marker={'size': size, 'color': color,
-                                                  'line': dict(width=width, color=colorLine)})
-    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01, lines=lines, **kwargs)
+                                                  'line': dict(width=width, color=colorLine)}, **kwargs)
+    # pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01, lines=lines, **kwargs)
+    pl.box_set_go(fig, mesh=None, autoDots=dots_bound, perBox=0.01, lines=lines)
     if save is not None:
         fig.write_html(save)
     if show:
