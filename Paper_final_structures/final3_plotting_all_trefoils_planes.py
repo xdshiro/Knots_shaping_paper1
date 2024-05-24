@@ -11,8 +11,8 @@ import math
 import scipy.io
 
 
-font_numbers = 20
-font_label = 20
+font_numbers = 26
+font_label = 26
 font_text = 24
 fonts = (font_numbers, font_label, font_text)
 family = 'Sans-serif'
@@ -47,8 +47,10 @@ def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmapE='afmhot', 
     plt.xticks(())
     plt.yticks(())
     if show_axis:
-        plt.xticks(np.arange(-4, 5, 2))
-        plt.yticks(np.arange(-4, 5, 2))
+        # plt.xticks(np.arange(-4, 5, 2))
+        # plt.yticks(np.arange(-4, 5, 2))
+        plt.xticks([-3, 0, 3])
+        plt.yticks([-3, 0, 3])
         plt.xlabel('$x/w_0$', labelpad=-1)
         plt.ylabel('$y/w_0$', labelpad=-13)
     plt.text(-3.6, 3.1, '$z=0$', color='w')
@@ -64,8 +66,10 @@ def plot_field(field, axes=True, titles=('Amplitude', 'Phase'), cmapE='afmhot', 
     plt.xticks(())
     plt.yticks(())
     if show_axis:
-        plt.xticks(np.arange(-4, 5, 2))
-        plt.yticks(np.arange(-4, 5, 2))
+        # plt.xticks(np.arange(-3, 5, 2))
+        # plt.yticks(np.arange(-3, 5, 2))
+        plt.xticks([-3, 0, 3])
+        plt.yticks([-3, 0, 3])
         plt.xlabel('$x/w_0$', labelpad=-1)
         plt.ylabel('$y/w_0$', labelpad=-13)
     plt.text(-3.6, 3.1, '$z=0$')
@@ -92,6 +96,7 @@ if trefoil_normal:
                show_axis=True, fonts=fonts)
     plt.savefig('test.svg', transparent=True)
     plt.show()
+    exit()
 
 trefoil_normal_no_ticks = 0
 if trefoil_normal_no_ticks:

@@ -187,7 +187,7 @@ if 1:
     # C03 = -2.3
     # C_31 = 0
     # C30 = -4.36  # * np.exp(1j * (np.pi / 2 + np.pi / 6))
-    # # our
+    # our
     # C00 = 1.55
     # C01 = -5.11
     # C02 = 8.29
@@ -196,7 +196,7 @@ if 1:
     # C_31 = 0
     width = 1.6
     # width = 1.6
-    width = 1.4
+    width = 1.6
     field = (
             C00 * bp.LG_simple(*mesh_3D, l=0, p=0, width=width) +
             C01 * bp.LG_simple(*mesh_3D, l=0, p=1, width=width) +
